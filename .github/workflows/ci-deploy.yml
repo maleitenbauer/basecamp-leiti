@@ -19,7 +19,7 @@ jobs:
         with:
           distribution: temurin
           java-version: 21
-      - uses: gradle/actions/setup-gradle@v4
+      - uses: gradle/actions/setup-gradle@v6
       - name: API tests (incl. Modulith boundary check)
         working-directory: api
         run: chmod +x gradlew && ./gradlew test --no-daemon
