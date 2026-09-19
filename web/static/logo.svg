@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Basecamp campfire">
+  <defs>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#f97316" stop-opacity="0.38"/>
+      <stop offset="0.6" stop-color="#f97316" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#f97316" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="flame" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffb347"/>
+      <stop offset="0.55" stop-color="#f97316"/>
+      <stop offset="1" stop-color="#dc4a05"/>
+    </linearGradient>
+    <linearGradient id="core" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe08a"/>
+      <stop offset="1" stop-color="#ffb02e"/>
+    </linearGradient>
+    <linearGradient id="logA" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9a6332"/>
+      <stop offset="1" stop-color="#6d4322"/>
+    </linearGradient>
+    <linearGradient id="logB" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7d4d26"/>
+      <stop offset="1" stop-color="#553419"/>
+    </linearGradient>
+  </defs>
+
+  <!-- tile -->
+  <rect width="512" height="512" rx="112" fill="#0f172a"/>
+
+  <!-- glow -->
+  <circle cx="256" cy="290" r="230" fill="url(#glow)"/>
+
+  <!-- outer flame -->
+  <path fill="url(#flame)" d="M256 52 C 272 116 376 168 376 272 C 376 346 322 396 256 396 C 190 396 136 346 136 272 C 136 222 166 190 188 150 C 200 196 222 214 234 218 C 224 158 236 104 256 52 Z"/>
+
+  <!-- inner flame -->
+  <path fill="url(#core)" d="M256 178 C 268 232 326 258 326 318 C 326 358 296 386 256 386 C 216 386 186 358 186 318 C 186 282 210 262 228 232 C 236 256 250 266 258 268 C 250 236 250 206 256 178 Z"/>
+
+  <!-- the L -->
+  <path d="M236 244 V336 H290" fill="none" stroke="#0f172a" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- crossed logs -->
+  <g>
+    <rect x="104" y="398" width="304" height="46" rx="23" fill="url(#logA)" transform="rotate(-11 256 421)"/>
+    <rect x="104" y="398" width="304" height="46" rx="23" fill="url(#logB)" transform="rotate(11 256 421)"/>
+  </g>
+</svg>

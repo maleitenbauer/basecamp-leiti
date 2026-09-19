@@ -25,7 +25,7 @@
 					href={p.href}
 					aria-current={page.url.pathname === p.href ? 'page' : undefined}
 					class="-mb-px border-b-2 px-3 py-2 text-sm whitespace-nowrap {page.url.pathname === p.href
-						? 'border-emerald-500 text-white'
+						? 'border-brand-500 text-white'
 						: 'border-transparent text-slate-400 hover:text-white'}"
 				>
 					{p.name}

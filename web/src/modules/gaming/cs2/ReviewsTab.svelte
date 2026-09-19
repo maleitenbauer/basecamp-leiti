@@ -77,7 +77,7 @@
 					max="5"
 					step="1"
 					bind:value={values[r.key]}
-					class="mt-1 w-full accent-emerald-500"
+					class="mt-1 w-full accent-brand-500"
 				/>
 			</label>
 		{/each}
@@ -92,7 +92,7 @@
 		<button
 			type="submit"
 			disabled={create.isPending}
-			class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium hover:bg-emerald-500 disabled:opacity-50"
+			class="rounded-md bg-brand-500 text-slate-950 px-4 py-2 text-sm font-medium hover:bg-brand-400 disabled:opacity-50"
 		>
 			Save review
 		</button>
