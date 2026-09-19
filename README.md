@@ -62,3 +62,15 @@ Module boundaries are verified by `ModularityTests` (`./gradlew test`).
 - No public sign-up. The first admin comes from `BASECAMP_ADMIN_USER` / `BASECAMP_ADMIN_PASSWORD` while the
   user table is empty; locally `scripts\dev.ps1` uses `admin` / `dev-admin-password`.
 - Not done yet: passkeys, per-IP rate limiting, personal access tokens for scripts.
+
+## Modules and submodules
+
+Every module can have submodules, and every submodule has pages (tabs): `Gaming > Counter-Strike 2 > Improvement`.
+
+- Navigation is built from `web/src/modules/registry.ts` (module -> submodules -> pages).
+- Add a submodule: add an entry to the registry, create routes under `web/src/routes/<module>/<submodule>/`
+  (a `+layout.svelte` using `SubmoduleShell` gives it the breadcrumb and tabs), and put its code in
+  `web/src/modules/<module>/<submodule>/`.
+- Backend: one Java/Kotlin sub-package per submodule (`gaming.cs2`), tables in the module's schema (`gaming`) prefixed with
+  the submodule (`cs2_...`), endpoints under `/api/<module>/<submodule>/...`. Scope every row by user id via
+  `CurrentUserProvider` and look records up by `id` **and** `userId`.
