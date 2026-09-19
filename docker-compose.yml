@@ -1,3 +1,7 @@
+# Fixed project name: volumes must not depend on the checkout directory
+# (the CI runner checks out into a different path than a manual clone).
+name: basecamp
+
 services:
   postgres:
     image: postgres:17
@@ -5,7 +9,7 @@ services:
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-basecamp}
       POSTGRES_USER: ${POSTGRES_USER:-basecamp}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-basecamp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
@@ -25,7 +29,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-basecamp}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-basecamp}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-basecamp}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
     ports:
       - "127.0.0.1:8080:8080"
 
