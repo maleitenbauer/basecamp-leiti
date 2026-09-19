@@ -18,7 +18,7 @@ $jdk = Get-ChildItem 'C:\Program Files\Eclipse Adoptium' -Directory -ErrorAction
 $services = @{
     api = @{
         port = 8080
-        cmd  = "`$env:JAVA_HOME='$jdk'; cd '$root\api'; .\gradlew.bat bootRun 2>&1 | Tee-Object '$root\api\bootrun.log'"
+        cmd  = "`$env:JAVA_HOME='$jdk'; `$env:BASECAMP_ADMIN_PASSWORD='dev-admin-password'; `$env:SESSION_COOKIE_SECURE='false'; cd '$root\api'; .\gradlew.bat bootRun 2>&1 | Tee-Object '$root\api\bootrun.log'"
     }
     web = @{
         port = 5173

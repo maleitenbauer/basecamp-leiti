@@ -22,6 +22,8 @@ sudo -u deploy bash -c 'cat > /opt/basecamp/.env <<EOF
 POSTGRES_DB=basecamp
 POSTGRES_USER=basecamp
 POSTGRES_PASSWORD=$(openssl rand -hex 24)
+BASECAMP_ADMIN_USER=admin
+BASECAMP_ADMIN_PASSWORD=<choose a long password, 12-72 characters>
 EOF
 chmod 600 /opt/basecamp/.env'
 ```
@@ -73,5 +75,17 @@ The runner's checkout lives in `/opt/basecamp/actions-runner/_work/basecamp-leit
 ## Notes
 
 - Ports 5432/8080/3000 are bound to `127.0.0.1` on the server; only Tailscale Serve exposes the app.
-- There is no login yet (Phase 1). Until then the tailnet is the only protection.
+- The tailnet is the outer layer; the app has its own login on top (see "Login and users" below).
 - A self-hosted runner executes whatever is in the workflow files, so keep the repo private and protect `main`.
+
+## Login and users
+
+- The first admin is created from `BASECAMP_ADMIN_USER` / `BASECAMP_ADMIN_PASSWORD` **only while the user table is empty**.
+  If the variable is missing on the very first start, the API refuses to start and the deploy job fails with a
+  clear message. After the first login, change the password under **Account** and delete the password line from
+  `/opt/basecamp/.env`.
+- Further users: **Users** page (admins only). Disabling a user, changing their role or resetting their password
+  signs them out everywhere.
+- A lost phone: disable the user (signs out all devices), or delete rows from `spring_session` for that
+  `principal_name`.
+- Sessions live in Postgres: 90 days idle timeout (sliding), and the cookie itself expires 180 days after login.

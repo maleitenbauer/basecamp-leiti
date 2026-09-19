@@ -48,3 +48,17 @@ cd web && pnpm install && pnpm dev   # web on :5173, proxies /api to :8080
 Generate the typed API client (api must be running): `cd web && pnpm api:generate`.
 
 Module boundaries are verified by `ModularityTests` (`./gradlew test`).
+
+## Authentication & security
+
+- Login: username + password (bcrypt), `POST /api/auth/login`. The session lives in Postgres (Spring Session JDBC)
+  and is referenced by an `HttpOnly`, `Secure`, `SameSite=Lax` cookie. 90 days sliding idle timeout, 180 days
+  absolute cookie lifetime. No tokens in JavaScript.
+- CSRF: state-changing requests must send the `X-XSRF-TOKEN` header (value of the `XSRF-TOKEN` cookie);
+  `web/src/lib/api/http.ts` does this.
+- 5 wrong passwords lock an account for 15 minutes. Session ids are rotated on login.
+- Roles `ADMIN` / `USER`; `/api/admin/**` is admin only. Modules get the caller via `CurrentUserProvider`
+  (`core`) and should scope their data by user id.
+- No public sign-up. The first admin comes from `BASECAMP_ADMIN_USER` / `BASECAMP_ADMIN_PASSWORD` while the
+  user table is empty; locally `scripts\dev.ps1` uses `admin` / `dev-admin-password`.
+- Not done yet: passkeys, per-IP rate limiting, personal access tokens for scripts.

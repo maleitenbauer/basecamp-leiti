@@ -9,6 +9,8 @@ export default defineConfig({
 		sveltekit(),
 		SvelteKitPWA({
 			registerType: 'autoUpdate',
+			// never let the service worker answer API navigations with the app shell or a cached response
+			workbox: { navigateFallbackDenylist: [/^\/api\//] },
 			manifest: {
 				name: 'Basecamp',
 				short_name: 'Basecamp',

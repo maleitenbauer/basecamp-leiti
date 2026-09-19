@@ -30,12 +30,19 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-basecamp}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-basecamp}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      # Only read while the user table is empty (first start). The app refuses to start without it then.
+      BASECAMP_ADMIN_USER: ${BASECAMP_ADMIN_USER:-admin}
+      BASECAMP_ADMIN_PASSWORD: ${BASECAMP_ADMIN_PASSWORD:-}
+    security_opt:
+      - no-new-privileges:true
     ports:
       - "127.0.0.1:8080:8080"
 
   web:
     build: ./web
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       - api
     ports:

@@ -5,6 +5,10 @@ on:
   push:
     branches: [main]
 
+# Least privilege for the automatic GITHUB_TOKEN; nothing here needs to write to the repo.
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest

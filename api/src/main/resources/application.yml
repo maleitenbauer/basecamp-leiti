@@ -12,9 +12,29 @@ spring:
   flyway:
     schemas: public
     create-schemas: true
+  mvc:
+    problemdetails:
+      enabled: true
   session:
+    timeout: 90d            # idle timeout, sliding: every request extends it
     jdbc:
-      initialize-schema: always
+      initialize-schema: never
+
+server:
+  forward-headers-strategy: framework   # trust X-Forwarded-* from nginx / Tailscale Serve
+  servlet:
+    session:
+      cookie:
+        name: BASECAMP_SESSION
+        http-only: true
+        secure: ${SESSION_COOKIE_SECURE:true}   # scripts\dev.ps1 sets false for plain http://localhost
+        same-site: lax
+        max-age: 180d       # absolute lifetime of the cookie: a full re-login at least every 180 days
+
+basecamp:
+  bootstrap-admin:          # only used while the user table is empty
+    username: ${BASECAMP_ADMIN_USER:admin}
+    password: ${BASECAMP_ADMIN_PASSWORD:}
 
 management:
   endpoints:
