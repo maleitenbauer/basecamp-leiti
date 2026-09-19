@@ -46,7 +46,7 @@
 {#snippet card(p: Principle)}
 	<li
 		class="rounded-lg border p-3 {p.pinned
-			? 'border-emerald-700 bg-emerald-950/30'
+			? 'border-brand-700 bg-brand-950/30'
 			: 'border-slate-700 bg-slate-800/40'}"
 	>
 		<div class="flex items-start gap-3">
@@ -57,7 +57,7 @@
 			</div>
 			<button
 				onclick={() => pin.mutate({ id: p.id, pinned: !p.pinned })}
-				class="text-sm {p.pinned ? 'text-emerald-400' : 'text-slate-500 hover:text-white'}"
+				class="text-sm {p.pinned ? 'text-brand-400' : 'text-slate-500 hover:text-white'}"
 				aria-pressed={p.pinned}
 				title={p.pinned ? 'Unpin' : 'Pin as focus'}
 			>
@@ -80,7 +80,7 @@
 	{:else}
 		{#if pinned.length > 0}
 			<section>
-				<h2 class="mb-2 text-sm font-medium tracking-wide text-emerald-400 uppercase">Focus now</h2>
+				<h2 class="mb-2 text-sm font-medium tracking-wide text-brand-400 uppercase">Focus now</h2>
 				<ul class="space-y-2">
 					{#each pinned as p (p.id)}{@render card(p)}{/each}
 				</ul>
@@ -126,7 +126,7 @@
 			<button
 				type="submit"
 				disabled={create.isPending}
-				class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium hover:bg-emerald-500 disabled:opacity-50"
+				class="rounded-md bg-brand-500 text-slate-950 px-4 py-2 text-sm font-medium hover:bg-brand-400 disabled:opacity-50"
 			>
 				Add
 			</button>

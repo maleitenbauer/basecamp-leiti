@@ -1,1 +1,40 @@
 @import 'tailwindcss';
+
+/* Brand colour: campfire orange. Everything accent-coloured uses brand-*, so the whole app can be re-tinted here. */
+@theme {
+	--color-brand-50: #fff7ed;
+	--color-brand-100: #ffedd5;
+	--color-brand-200: #fed7aa;
+	--color-brand-300: #fdba74;
+	--color-brand-400: #fb923c;
+	--color-brand-500: #f97316;
+	--color-brand-600: #ea580c;
+	--color-brand-700: #c2410c;
+	--color-brand-800: #9a3412;
+	--color-brand-900: #7c2d12;
+	--color-brand-950: #431407;
+}
+
+@layer base {
+	:root {
+		accent-color: var(--color-brand-500);
+		color-scheme: dark;
+	}
+
+	::selection {
+		background: var(--color-brand-500);
+		color: var(--color-slate-950);
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--color-brand-400);
+		outline-offset: 2px;
+	}
+
+	/* inputs get a subtle orange ring instead of the browser default */
+	input:focus-visible,
+	select:focus-visible,
+	textarea:focus-visible {
+		outline-color: var(--color-brand-500);
+	}
+}

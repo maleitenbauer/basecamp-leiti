@@ -96,7 +96,7 @@
 			aria-label="Next day">→</button
 		>
 		{#if date !== today()}
-			<button onclick={() => (date = today())} class="text-sm text-emerald-400 hover:text-emerald-300">
+			<button onclick={() => (date = today())} class="text-sm text-brand-400 hover:text-brand-300">
 				Today
 			</button>
 		{/if}
@@ -121,7 +121,7 @@
 				{#each routine.data.history as h (h.date)}
 					<div class="flex flex-col items-center gap-1" title="{h.date}: {h.doneCount} done">
 						<div
-							class="w-3 rounded-sm {h.date === date ? 'bg-emerald-400' : 'bg-emerald-700'}"
+							class="w-3 rounded-sm {h.date === date ? 'bg-brand-400' : 'bg-brand-700'}"
 							style="height: {h.doneCount === 0 ? 3 : 6 + (h.doneCount / maxHistory) * 26}px; opacity: {h.doneCount === 0
 								? 0.25
 								: 1}"
@@ -143,7 +143,7 @@
 									type="checkbox"
 									checked={item.done}
 									onchange={(e) => toggle(item, e.currentTarget.checked)}
-									class="mt-1 h-5 w-5 accent-emerald-500"
+									class="mt-1 h-5 w-5 accent-brand-500"
 									aria-label="Done: {item.title}"
 								/>
 								<div class="min-w-0 flex-1">
@@ -214,7 +214,7 @@
 				<button
 					type="submit"
 					disabled={createItem.isPending}
-					class="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium hover:bg-emerald-500 disabled:opacity-50"
+					class="rounded-md bg-brand-500 text-slate-950 px-4 py-2 text-sm font-medium hover:bg-brand-400 disabled:opacity-50"
 				>
 					Add
 				</button>

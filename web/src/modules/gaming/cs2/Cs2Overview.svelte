@@ -27,7 +27,7 @@
 	<section class="rounded-lg border border-slate-700 p-4">
 		<div class="flex items-center justify-between">
 			<h2 class="text-sm font-medium tracking-wide text-slate-400 uppercase">Today's routine</h2>
-			<a href="/gaming/cs2/improvement" class="text-sm text-emerald-400 hover:text-emerald-300">Open →</a>
+			<a href="/gaming/cs2/improvement" class="text-sm text-brand-400 hover:text-brand-300">Open →</a>
 		</div>
 		{#if routine.isPending}
 			<p class="mt-2 text-slate-400">Loading…</p>
@@ -52,8 +52,8 @@
 	</section>
 
 	{#if pinned.length > 0}
-		<section class="rounded-lg border border-emerald-700 bg-emerald-950/30 p-4">
-			<h2 class="text-sm font-medium tracking-wide text-emerald-400 uppercase">Focus now</h2>
+		<section class="rounded-lg border border-brand-700 bg-brand-950/30 p-4">
+			<h2 class="text-sm font-medium tracking-wide text-brand-400 uppercase">Focus now</h2>
 			<ul class="mt-2 space-y-3">
 				{#each pinned as p (p.id)}
 					<li>
