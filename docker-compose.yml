@@ -1,0 +1,41 @@
+services:
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-basecamp}
+      POSTGRES_USER: ${POSTGRES_USER:-basecamp}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-basecamp}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-basecamp} -d ${POSTGRES_DB:-basecamp}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-basecamp}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-basecamp}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-basecamp}
+    ports:
+      - "127.0.0.1:8080:8080"
+
+  web:
+    build: ./web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:3000:80"
+
+volumes:
+  pgdata:

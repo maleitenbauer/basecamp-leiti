@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: basecamp
+  datasource:
+    url: jdbc:postgresql://localhost:5432/basecamp
+    username: basecamp
+    password: basecamp
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    schemas: public
+    create-schemas: true
+  session:
+    jdbc:
+      initialize-schema: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+
+springdoc:
+  api-docs:
+    path: /api/openapi
+  swagger-ui:
+    path: /api/swagger-ui

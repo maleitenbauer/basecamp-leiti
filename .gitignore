@@ -1,0 +1,47 @@
+# Env / secrets (keep .env.example)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# IDE / OS
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.classpath
+.project
+.settings/
+.factorypath
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Claude Code local settings
+.claude/settings.local.json
+
+# Logs / crash dumps
+*.log
+hs_err_pid*
+
+# api (Gradle / Kotlin)
+.gradle/
+build/
+out/
+.kotlin/
+bin/
+
+# web (Node)
+node_modules/
+.svelte-kit/
+dev-dist/
+vite.config.ts.timestamp-*
+web/src/lib/api/schema.d.ts
+
+# Local dev process state
+.dev/
+
+# Backups
+backups/
