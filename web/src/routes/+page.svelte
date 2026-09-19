@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { createQuery } from '@tanstack/svelte-query';
+	import { modules } from '$modules/registry';
 
 	const ping = createQuery(() => ({
 		queryKey: ['ping'],
@@ -15,7 +16,16 @@
 
 <main class="mx-auto max-w-3xl p-6">
 	<h1 class="text-3xl font-semibold">Basecamp</h1>
-	<p class="mt-2 text-slate-400">Dashboard shell — modules will appear here.</p>
+
+	<div class="mt-6 grid gap-3 sm:grid-cols-2">
+		{#each modules as m (m.id)}
+			<a href={m.href} class="rounded-lg border border-slate-700 p-4 hover:border-slate-500">
+				<div class="text-2xl">{m.icon}</div>
+				<div class="mt-1 font-medium">{m.name}</div>
+				<div class="text-sm text-slate-400">{m.description}</div>
+			</a>
+		{/each}
+	</div>
 
 	<section class="mt-8 rounded-lg border border-slate-700 p-4" data-testid="backend-status">
 		<h2 class="text-sm font-medium tracking-wide text-slate-400 uppercase">Backend</h2>
