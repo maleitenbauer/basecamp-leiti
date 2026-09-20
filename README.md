@@ -74,3 +74,9 @@ Every module can have submodules, and every submodule has pages (tabs): `Gaming 
 - Backend: one Java/Kotlin sub-package per submodule (`gaming.cs2`), tables in the module's schema (`gaming`) prefixed with
   the submodule (`cs2_...`), endpoints under `/api/<module>/<submodule>/...`. Scope every row by user id via
   `CurrentUserProvider` and look records up by `id` **and** `userId`.
+
+## Map images (CS2 matches)
+
+The match list uses generated map art (original, in the app's colours). Real map images belong to Valve, so none are
+bundled. To use your own, put PNGs in `web/static/maps/` named after the map without its prefix, e.g. `mirage.png`,
+`dust2.png`, `inferno.png`; they are picked up automatically (and cached lazily, not precached, by the PWA).

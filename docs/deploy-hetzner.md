@@ -89,3 +89,16 @@ The runner's checkout lives in `/opt/basecamp/actions-runner/_work/basecamp-leit
 - A lost phone: disable the user (signs out all devices), or delete rows from `spring_session` for that
   `principal_name`.
 - Sessions live in Postgres: 90 days idle timeout (sliding), and the cookie itself expires 180 days after login.
+
+## CS2 match integrations (FACEIT and Leetify)
+
+- **FACEIT** needs a server-side API key: create an app at developers.faceit.com and copy its *Server side API key*.
+  Add `FACEIT_API_KEY=<key>` to `/opt/basecamp/.env`, then redeploy (or `docker compose -p basecamp up -d api`).
+  Without it, the FACEIT tab tells the user that FACEIT is not set up on the server.
+- **Leetify** works without a key at a lower rate limit. Optionally add `LEETIFY_API_KEY=<key>` (leetify.com/app/developer).
+- Each user enters their own FACEIT nickname and Steam64 ID on the Matches page. The Leetify profile must be public.
+- Match data is fetched live and only cached in memory for two minutes; it is never written to the database
+  (Leetify asks developers not to store their data). The pages show the required "Data provided by Leetify" attribution.
+- Locally: set the keys as user environment variables before starting the API, for example in PowerShell
+  `[Environment]::SetEnvironmentVariable('FACEIT_API_KEY','<key>','User')`, then open a new terminal and
+  run `scripts\dev.ps1 api restart`.

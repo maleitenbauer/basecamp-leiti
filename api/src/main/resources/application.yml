@@ -36,6 +36,13 @@ basecamp:
     username: ${BASECAMP_ADMIN_USER:admin}
     password: ${BASECAMP_ADMIN_PASSWORD:}
 
+  faceit:                   # FACEIT Data API v4; the key is a server-side secret and never reaches the browser
+    base-url: https://open.faceit.com/data/v4
+    api-key: ${FACEIT_API_KEY:}
+  leetify:                  # Leetify public API; works without a key at a lower rate limit
+    base-url: https://api-public.cs-prod.leetify.com
+    api-key: ${LEETIFY_API_KEY:}
+
 management:
   endpoints:
     web:
