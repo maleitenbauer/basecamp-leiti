@@ -33,6 +33,9 @@ services:
       # Only read while the user table is empty (first start). The app refuses to start without it then.
       BASECAMP_ADMIN_USER: ${BASECAMP_ADMIN_USER:-admin}
       BASECAMP_ADMIN_PASSWORD: ${BASECAMP_ADMIN_PASSWORD:-}
+      # Optional integrations; the pages tell the user what is missing when a key is empty.
+      FACEIT_API_KEY: ${FACEIT_API_KEY:-}
+      LEETIFY_API_KEY: ${LEETIFY_API_KEY:-}
     security_opt:
       - no-new-privileges:true
     ports:

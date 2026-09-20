@@ -10,7 +10,18 @@ export default defineConfig({
 		SvelteKitPWA({
 			registerType: 'autoUpdate',
 			// never let the service worker answer API navigations with the app shell or a cached response
-			workbox: { navigateFallbackDenylist: [/^\/api\//] },
+			workbox: {
+				navigateFallbackDenylist: [/^\/api\//],
+				// optional map images (static/maps/*.png) are cached when first seen instead of being precached
+				globIgnores: ['**/maps/**'],
+				runtimeCaching: [
+					{
+						urlPattern: ({ url }: { url: URL }) => url.pathname.startsWith('/maps/'),
+						handler: 'CacheFirst',
+						options: { cacheName: 'map-images', expiration: { maxEntries: 60 } }
+					}
+				]
+			},
 			includeAssets: ['favicon.ico', 'logo.svg', 'apple-touch-icon-180x180.png'],
 			manifest: {
 				id: '/',

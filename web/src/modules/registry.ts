@@ -41,6 +41,7 @@ export const modules: ModuleInfo[] = [
 				description: 'Daily routine, session reviews and coach principles',
 				pages: [
 					{ id: 'overview', name: 'Overview', href: '/gaming/cs2' },
+					{ id: 'matches', name: 'Matches', href: '/gaming/cs2/matches' },
 					{ id: 'improvement', name: 'Improvement', href: '/gaming/cs2/improvement' }
 				]
 			}
