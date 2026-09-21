@@ -27,6 +27,11 @@ data class NotificationConfigResponse(
     val devices: List<DeviceResponse>,
 )
 
+/** What happened to one device when a notification was pushed. [detail] explains a failure in plain words. */
+data class DeviceDelivery(val device: String, val delivered: Boolean, val detail: String)
+
+data class TestResult(val pushAvailable: Boolean, val deviceCount: Int, val deliveries: List<DeviceDelivery>)
+
 data class UpdateNotificationSettingsRequest(
     @field:NotBlank @field:Size(max = 64) val timezone: String,
 )

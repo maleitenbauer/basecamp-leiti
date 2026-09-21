@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { createMutation, createQuery, useQueryClient } from '@tanstack/svelte-query';
-	import { browserTimezone, notificationsApi } from '$lib/notifications/api';
+	import { browserTimezone, notificationsApi, type TestResult } from '$lib/notifications/api';
 	import { currentSubscription, disablePushInBrowser, enablePush, pushSupported } from '$lib/notifications/push';
 
 	const queryClient = useQueryClient();
@@ -47,12 +47,16 @@
 		onError: (e: Error) => (error = e.message)
 	}));
 
+	// what happened to each device on the last test, so a missing push can be diagnosed instead of guessed at
+	let testResult = $state<TestResult | null>(null);
+
 	const test = createMutation(() => ({
 		mutationFn: () => notificationsApi.test(),
-		onMutate: () => ((message = ''), (error = '')),
-		onSuccess: () => {
-			message = 'Sent. Check the bell, and your device if push is enabled.';
+		onMutate: () => ((message = ''), (error = ''), (testResult = null)),
+		onSuccess: (result) => {
+			testResult = result;
 			queryClient.invalidateQueries({ queryKey: ['notifications'] });
+			refresh();
 		},
 		onError: (e: Error) => (error = e.message)
 	}));
@@ -115,6 +119,36 @@
 				{#if message}<span class="text-sm text-emerald-400">{message}</span>{/if}
 				{#if error}<span class="text-sm text-red-400" role="alert">{error}</span>{/if}
 			</div>
+
+			{#if testResult}
+				<div class="space-y-1 rounded-md bg-slate-800/60 p-3 text-sm" role="status">
+					<p class="text-emerald-400">✓ Added to the bell.</p>
+					{#if !testResult.pushAvailable}
+						<p class="text-amber-400">
+							✗ Push: the server has no VAPID keys (or they are invalid), so nothing was pushed.
+						</p>
+					{:else if testResult.deviceCount === 0}
+						<p class="text-amber-400">
+							✗ Push: no device has push enabled yet. Press "Enable on this device" first.
+						</p>
+					{:else}
+						{#each testResult.deliveries as delivery, i (i)}
+							<p class={delivery.delivered ? 'text-emerald-400' : 'text-red-400'}>
+								{delivery.delivered ? '✓' : '✗'}
+								{delivery.device}: {delivery.detail}
+							</p>
+						{/each}
+						{#if testResult.deliveries.some((delivery) => delivery.delivered)}
+							<p class="pt-1 text-xs text-slate-500">
+								"Accepted" means the push service took the message. If it still doesn't appear, check that
+								notifications are switched on for your browser in the system settings (Windows: Settings →
+								System → Notifications, with Focus assist off; Android: the browser's or app's notification
+								settings), and that the browser or installed app is allowed to run in the background.
+							</p>
+						{/if}
+					{/if}
+				</div>
+			{/if}
 		</section>
 
 		<section class="space-y-2 rounded-lg border border-slate-700 p-4">
