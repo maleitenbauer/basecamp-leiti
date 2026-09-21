@@ -28,8 +28,13 @@ class NotificationService(
     // ---- Notifier (used by other modules) ----
 
     override fun send(userId: Long, title: String, body: String?, url: String?, category: String) {
+        sendAndReport(userId, title, body, url, category)
+    }
+
+    /** Stores the in-app notification, pushes it to every device and reports what each device's push service said. */
+    private fun sendAndReport(userId: Long, title: String, body: String?, url: String?, category: String): List<DeviceDelivery> {
         notifications.save(AppNotification(userId, title.take(200), body, url?.take(500), category))
-        pushToDevices(userId, title, body, url)
+        return pushToDevices(userId, title, body, url)
     }
 
     @Transactional(readOnly = true)
@@ -109,8 +114,15 @@ class NotificationService(
         )
     }
 
-    fun sendTest(userId: Long) {
-        send(userId, "Test notification", "If you can read this, notifications work on this device.", "/", "test")
+    fun sendTest(userId: Long): TestResult {
+        val deliveries = sendAndReport(
+            userId,
+            "Test notification",
+            "If you can read this, notifications work on this device.",
+            "/",
+            "test",
+        )
+        return TestResult(pushAvailable = push.configured, deviceCount = deliveries.size, deliveries = deliveries)
     }
 
     /** Old notifications are not kept forever. */
@@ -120,17 +132,19 @@ class NotificationService(
         if (removed > 0) log.info("Removed {} old notifications", removed)
     }
 
-    private fun pushToDevices(userId: Long, title: String, body: String?, url: String?) {
-        if (!push.configured) return
+    private fun pushToDevices(userId: Long, title: String, body: String?, url: String?): List<DeviceDelivery> {
+        if (!push.configured) return emptyList()
         val devices = subscriptions.findAllByUserIdOrderByCreatedAtDesc(userId)
-        if (devices.isEmpty()) return
+        if (devices.isEmpty()) return emptyList()
         val payload = mapper.writeValueAsString(mapOf("title" to title, "body" to (body ?: ""), "url" to (url ?: "/")))
-        for (device in devices) {
-            when (push.send(device, payload)) {
+        return devices.map { device ->
+            val outcome = push.send(device, payload)
+            when (outcome.result) {
                 WebPushSender.Result.DELIVERED -> device.lastUsedAt = Instant.now()
                 WebPushSender.Result.GONE -> subscriptions.delete(device)
                 WebPushSender.Result.FAILED -> Unit
             }
+            DeviceDelivery(deviceLabel(device.userAgent), outcome.result == WebPushSender.Result.DELIVERED, outcome.detail)
         }
     }
 

@@ -2,6 +2,7 @@ package com.markus.basecamp.core.notifications
 
 import nl.martijndwars.webpush.Notification
 import nl.martijndwars.webpush.PushService
+import org.apache.http.util.EntityUtils
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -17,6 +18,9 @@ class WebPushSender(
 ) {
     enum class Result { DELIVERED, GONE, FAILED }
 
+    /** [detail] is shown to the user in the notification settings, so it says what the push service answered. */
+    class Outcome(val result: Result, val detail: String)
+
     private val log = LoggerFactory.getLogger(javaClass)
 
     val configured: Boolean get() = publicKey.isNotBlank() && privateKey.isNotBlank() && subject.isNotBlank()
@@ -30,10 +34,19 @@ class WebPushSender(
         }
     }
 
-    fun send(subscription: PushSubscription, payloadJson: String): Result {
-        val push = service ?: return Result.FAILED
+    fun send(subscription: PushSubscription, payloadJson: String): Outcome {
+        val push: PushService? = try {
+            service
+        } catch (e: Exception) {
+            log.warn("The VAPID keys could not be loaded: {}", e.message)
+            return Outcome(Result.FAILED, "The server's VAPID keys are invalid (${e.message})")
+        }
+        if (push == null) return Outcome(Result.FAILED, "Push is not configured on the server")
+
         // defence in depth: endpoints are checked when saved, and again before every request
-        if (!PushEndpointPolicy.isAllowed(subscription.endpoint)) return Result.GONE
+        if (!PushEndpointPolicy.isAllowed(subscription.endpoint)) {
+            return Outcome(Result.GONE, "This device uses a push service that is not supported")
+        }
         return try {
             val notification = Notification(
                 subscription.endpoint,
@@ -41,18 +54,20 @@ class WebPushSender(
                 subscription.auth,
                 payloadJson.toByteArray(Charsets.UTF_8),
             )
-            val status = push.send(notification).statusLine.statusCode
+            val response = push.send(notification)
+            val status = response.statusLine.statusCode
             when (status) {
-                in 200..299 -> Result.DELIVERED
-                404, 410 -> Result.GONE // the browser dropped the subscription
+                in 200..299 -> Outcome(Result.DELIVERED, "accepted by the push service (HTTP $status)")
+                404, 410 -> Outcome(Result.GONE, "the browser dropped this device (HTTP $status), enable push again")
                 else -> {
-                    log.warn("Push service answered HTTP {} for subscription {}", status, subscription.id)
-                    Result.FAILED
+                    val body = runCatching { EntityUtils.toString(response.entity) }.getOrNull().orEmpty().take(200)
+                    log.warn("Push service answered HTTP {} for subscription {}: {}", status, subscription.id, body)
+                    Outcome(Result.FAILED, "the push service answered HTTP $status $body".trim())
                 }
             }
         } catch (e: Exception) {
-            log.warn("Push to subscription {} failed: {}", subscription.id, e.message)
-            Result.FAILED
+            log.warn("Push to subscription {} failed: {}", subscription.id, e.toString())
+            Outcome(Result.FAILED, e.message ?: e.javaClass.simpleName)
         }
     }
 }

@@ -50,6 +50,5 @@ class NotificationController(
     fun unsubscribe(@PathVariable id: Long) = service.unsubscribe(userId, id)
 
     @PostMapping("/test")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun test() = service.sendTest(userId)
 }
