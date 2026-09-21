@@ -7,6 +7,13 @@ export function shiftDate(iso: string, days: number): string {
 	return d.toLocaleDateString('sv-SE');
 }
 
+/** Whole days from one YYYY-MM-DD date to another (negative when [to] is earlier). */
+export function daysBetween(from: string, to: string): number {
+	const a = new Date(`${from}T12:00:00`).getTime();
+	const b = new Date(`${to}T12:00:00`).getTime();
+	return Math.round((b - a) / 86_400_000);
+}
+
 export function weekday(iso: string): string {
 	return new Date(`${iso}T12:00:00`).toLocaleDateString(undefined, { weekday: 'short' });
 }
