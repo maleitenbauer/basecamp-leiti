@@ -36,6 +36,10 @@ services:
       # Optional integrations; the pages tell the user what is missing when a key is empty.
       FACEIT_API_KEY: ${FACEIT_API_KEY:-}
       LEETIFY_API_KEY: ${LEETIFY_API_KEY:-}
+      # Web Push for notifications (generate once: node scripts/generate-vapid-keys.mjs)
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY:-}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY:-}
+      VAPID_SUBJECT: ${VAPID_SUBJECT:-}
     security_opt:
       - no-new-privileges:true
     ports:

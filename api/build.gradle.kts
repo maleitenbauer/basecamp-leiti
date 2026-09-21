@@ -36,6 +36,10 @@ dependencies {
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+    implementation("nl.martijndwars:web-push:5.1.2")
+    // web-push declares these as optional / runtime-only, but our code uses both directly:
+    implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")          // BouncyCastleProvider (crypto for VAPID + payload encryption)
+    implementation("org.apache.httpcomponents:httpasyncclient:4.1.5") // HttpResponse type returned by PushService.send
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")

@@ -46,6 +46,22 @@ export const modules: ModuleInfo[] = [
 				]
 			}
 		]
+	},
+	{
+		id: 'logbook',
+		name: 'Logbook',
+		href: '/logbook',
+		icon: '📓',
+		description: 'Todos, deadlines and reminders',
+		submodules: [
+			{
+				id: 'todos',
+				name: 'Todos',
+				href: '/logbook/todos',
+				description: 'Things to do, with deadlines, notes and daily reminders',
+				pages: [{ id: 'list', name: 'Todo list', href: '/logbook/todos' }]
+			}
+		]
 	}
 ];
 

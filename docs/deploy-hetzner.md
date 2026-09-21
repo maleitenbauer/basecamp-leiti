@@ -102,3 +102,16 @@ The runner's checkout lives in `/opt/basecamp/actions-runner/_work/basecamp-leit
 - Locally: set the keys as user environment variables before starting the API, for example in PowerShell
   `[Environment]::SetEnvironmentVariable('FACEIT_API_KEY','<key>','User')`, then open a new terminal and
   run `scripts\dev.ps1 api restart`.
+
+## Notifications (Web Push) and todo reminders
+
+- Generate the VAPID keys **once** on any machine with Node (do not regenerate later: existing devices would need to
+  re-subscribe): `node scripts/generate-vapid-keys.mjs`. Add the three lines it prints (`VAPID_PUBLIC_KEY`,
+  `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`) to `/opt/basecamp/.env`, then redeploy.
+- Push needs the installed PWA over HTTPS (your Tailscale URL). On iPhone it only works for an app added to the home screen
+  (iOS 16.4+). On each device: **Settings → Notifications → Enable on this device**.
+- The server must be able to reach the browser push services (FCM, Mozilla, Apple, Windows) over HTTPS; nothing inbound is needed.
+- The bell inside the app works without push, and push messages are encrypted end to end.
+- Todo reminders run every minute on the server, in each user's own time zone (saved from the browser). Each user chooses the
+  time and whether "due today" and "overdue" are included under **Logbook → Todos → Reminders**.
+- Locally the service worker is not active in dev mode. Test push on the deployed HTTPS URL, or run `pnpm build && pnpm preview`.

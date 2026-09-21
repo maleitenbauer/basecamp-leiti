@@ -9,8 +9,17 @@ export default defineConfig({
 		sveltekit(),
 		SvelteKitPWA({
 			registerType: 'autoUpdate',
-			// never let the service worker answer API navigations with the app shell or a cached response
+			// static SPA: precache the app shell (index.html) so offline / cold starts and navigations work
+			kit: {
+				adapterFallback: 'index.html',
+				// the adapter writes index.html after the worker is generated, so the plugin cannot hash it itself:
+				// a new revision per build makes installed apps pick up every release
+				spa: { fallbackRevision: async () => String(Date.now()) }
+			},
 			workbox: {
+				// push and notification-click handlers live in static/push-sw.js and are pulled into the generated worker
+				importScripts: ['push-sw.js'],
+				// never let the service worker answer API navigations with the app shell or a cached response
 				navigateFallbackDenylist: [/^\/api\//],
 				// optional map images (static/maps/*.png) are cached when first seen instead of being precached
 				globIgnores: ['**/maps/**'],

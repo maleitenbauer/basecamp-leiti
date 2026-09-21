@@ -43,6 +43,11 @@ basecamp:
     base-url: https://api-public.cs-prod.leetify.com
     api-key: ${LEETIFY_API_KEY:}
 
+  push:                     # Web Push (VAPID). Generate the keys once with: node scripts/generate-vapid-keys.mjs
+    vapid-public-key: ${VAPID_PUBLIC_KEY:}
+    vapid-private-key: ${VAPID_PRIVATE_KEY:}
+    subject: ${VAPID_SUBJECT:}   # for example mailto:you@example.com
+
 management:
   endpoints:
     web:
