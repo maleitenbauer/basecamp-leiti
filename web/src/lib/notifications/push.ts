@@ -11,6 +11,13 @@ function urlBase64ToBytes(base64Url: string): Uint8Array {
 	return Uint8Array.from(raw, (c) => c.charCodeAt(0));
 }
 
+function bytesToUrlBase64(bytes: ArrayBuffer): string {
+	return btoa(String.fromCharCode(...new Uint8Array(bytes)))
+		.replace(/\+/g, '-')
+		.replace(/\//g, '_')
+		.replace(/=+$/, '');
+}
+
 /** The service worker is not active in dev mode, so waiting for it would hang forever. */
 async function registration(): Promise<ServiceWorkerRegistration> {
 	const timeout = new Promise<never>((_, reject) =>
@@ -47,6 +54,18 @@ export async function enablePush(vapidPublicKey: string): Promise<void> {
 	}
 
 	const reg = await registration();
+
+	// A subscription is permanently bound to the server key it was created with. Reusing an old one after the
+	// server's VAPID keys changed is exactly the "crypto-key/permission denied" error from the push service, so
+	// only ever reuse it when it was made with today's key; otherwise drop it and subscribe fresh.
+	const existing = await reg.pushManager.getSubscription();
+	if (existing) {
+		const existingKey = existing.options.applicationServerKey
+			? bytesToUrlBase64(existing.options.applicationServerKey)
+			: null;
+		if (existingKey !== vapidPublicKey) await existing.unsubscribe();
+	}
+
 	const subscription =
 		(await reg.pushManager.getSubscription()) ??
 		(await reg.pushManager.subscribe({

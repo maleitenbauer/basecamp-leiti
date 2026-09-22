@@ -3,11 +3,14 @@ package com.markus.basecamp.core.notifications
 import nl.martijndwars.webpush.Notification
 import nl.martijndwars.webpush.PushService
 import org.apache.http.util.EntityUtils
+import org.bouncycastle.jce.ECNamedCurveTable
 import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.math.BigInteger
 import java.security.Security
+import java.util.Base64
 
 /** Sends one encrypted Web Push message. Does nothing (and reports [configured] = false) without VAPID keys. */
 @Component
@@ -25,16 +28,48 @@ class WebPushSender(
 
     val configured: Boolean get() = publicKey.isNotBlank() && privateKey.isNotBlank() && subject.isNotBlank()
 
+    /**
+     * Null when the keys look right and belong together. Push services answer a bad key with a vague HTTP 403 (FCM even
+     * blames a "crypto-key header"), so this says what is actually wrong: wrong length, mixed-up pair, bad subject.
+     */
+    val keyProblem: String? by lazy { checkKeys() }
+
+    private fun checkKeys(): String? {
+        if (!configured) return null
+        val pub = runCatching { Base64.getUrlDecoder().decode(publicKey.trim()) }.getOrNull()
+            ?: return "VAPID_PUBLIC_KEY is not valid base64url text; it must be 87 characters and has ${publicKey.trim().length} (cut off when copying?)"
+        val priv = runCatching { Base64.getUrlDecoder().decode(privateKey.trim()) }.getOrNull()
+            ?: return "VAPID_PRIVATE_KEY is not valid base64url text; it must be 43 characters and has ${privateKey.trim().length} (cut off when copying?)"
+        if (pub.size != 65 || pub[0] != 0x04.toByte()) {
+            return "VAPID_PUBLIC_KEY must be 87 characters long, but it has ${publicKey.trim().length} (cut off when copying?)"
+        }
+        if (priv.size != 32) {
+            return "VAPID_PRIVATE_KEY must be 43 characters long, but it has ${privateKey.trim().length} (cut off when copying?)"
+        }
+        val subjectText = subject.trim()
+        if (!subjectText.startsWith("mailto:") && !subjectText.startsWith("https://")) {
+            return "VAPID_SUBJECT must start with mailto: or https://"
+        }
+        Security.addProvider(BouncyCastleProvider())
+        val curve = ECNamedCurveTable.getParameterSpec("secp256r1")
+        val derivedPublic = curve.g.multiply(BigInteger(1, priv)).normalize().getEncoded(false)
+        if (!derivedPublic.contentEquals(pub)) {
+            return "VAPID_PUBLIC_KEY and VAPID_PRIVATE_KEY do not belong together (they come from different generator runs)"
+        }
+        return null
+    }
+
     private val service: PushService? by lazy {
         if (!configured) {
             null
         } else {
             Security.addProvider(BouncyCastleProvider())
-            PushService(publicKey, privateKey, subject)
+            PushService(publicKey.trim(), privateKey.trim(), subject.trim())
         }
     }
 
     fun send(subscription: PushSubscription, payloadJson: String): Outcome {
+        keyProblem?.let { return Outcome(Result.FAILED, "The server's push keys are wrong: $it") }
         val push: PushService? = try {
             service
         } catch (e: Exception) {

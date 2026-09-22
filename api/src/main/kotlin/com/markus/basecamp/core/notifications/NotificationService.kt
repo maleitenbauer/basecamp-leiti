@@ -72,7 +72,8 @@ class NotificationService(
     @Transactional(readOnly = true)
     fun config(userId: Long) = NotificationConfigResponse(
         pushAvailable = push.configured,
-        vapidPublicKey = push.publicKey.takeIf { push.configured },
+        pushProblem = push.keyProblem,
+        vapidPublicKey = push.publicKey.trim().takeIf { push.configured && push.keyProblem == null },
         timezone = zoneOf(userId).id,
         devices = subscriptions.findAllByUserIdOrderByCreatedAtDesc(userId).map {
             DeviceResponse(it.id!!, deviceLabel(it.userAgent), it.endpoint, it.createdAt, it.lastUsedAt)
@@ -91,6 +92,9 @@ class NotificationService(
     fun subscribe(userId: Long, request: SubscribeRequest) {
         if (!push.configured) {
             throw ResponseStatusException(HttpStatus.CONFLICT, "Push is not set up on the server (VAPID keys are missing)")
+        }
+        push.keyProblem?.let {
+            throw ResponseStatusException(HttpStatus.CONFLICT, "The server's push keys are wrong: $it")
         }
         if (!PushEndpointPolicy.isAllowed(request.endpoint)) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Unsupported push service")
