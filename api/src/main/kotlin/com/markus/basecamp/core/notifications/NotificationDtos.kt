@@ -22,6 +22,8 @@ data class DeviceResponse(val id: Long, val label: String, val endpoint: String,
 data class NotificationConfigResponse(
     /** false until the server has VAPID keys */
     val pushAvailable: Boolean,
+    /** Set when the server's VAPID keys are misconfigured; says what is wrong. Push cannot work until it is fixed. */
+    val pushProblem: String?,
     val vapidPublicKey: String?,
     val timezone: String,
     val devices: List<DeviceResponse>,

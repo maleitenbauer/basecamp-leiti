@@ -25,6 +25,8 @@ export interface Device {
 
 export interface NotificationConfig {
 	pushAvailable: boolean;
+	/** set when the server's push keys are misconfigured; explains what is wrong */
+	pushProblem: string | null;
 	vapidPublicKey: string | null;
 	timezone: string;
 	devices: Device[];

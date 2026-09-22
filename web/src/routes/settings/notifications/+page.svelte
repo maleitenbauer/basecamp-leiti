@@ -84,7 +84,16 @@
 		<section class="space-y-3 rounded-lg border border-slate-700 p-4">
 			<h2 class="text-sm font-medium tracking-wide text-slate-400 uppercase">Push on this device</h2>
 
-			{#if !config.data.pushAvailable}
+			{#if config.data.pushProblem}
+				<div class="space-y-1 rounded-md border border-red-900 bg-red-950/30 p-3 text-sm" role="alert">
+					<p class="font-medium text-red-300">The server's push keys are set up wrong.</p>
+					<p class="text-red-200">{config.data.pushProblem}</p>
+					<p class="text-xs text-slate-400">
+						Fix the three VAPID_ values in the server's .env and redeploy. Devices that were enabled with the old keys
+						must be removed below and enabled again afterwards.
+					</p>
+				</div>
+			{:else if !config.data.pushAvailable}
 				<p class="text-sm text-amber-400">
 					Push is not set up on the server yet (the VAPID keys are missing). The bell still works.
 				</p>
