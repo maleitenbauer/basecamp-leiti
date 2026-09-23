@@ -1,5 +1,6 @@
 package com.markus.basecamp.core.notifications
 
+import nl.martijndwars.webpush.Encoding
 import nl.martijndwars.webpush.Notification
 import nl.martijndwars.webpush.PushService
 import org.apache.http.util.EntityUtils
@@ -89,7 +90,12 @@ class WebPushSender(
                 subscription.auth,
                 payloadJson.toByteArray(Charsets.UTF_8),
             )
-            val response = push.send(notification)
+            // Explicitly AESGCM, not the library's default AES128GCM: for FCM endpoints the library silently
+            // rewrites .../fcm/send/<id> to .../wp/<id> when using AES128GCM, and that rewritten endpoint answered
+            // "crypto-key header had invalid format" for us even with a verified-correct key. AESGCM skips the
+            // rewrite and posts to the endpoint exactly as the browser gave it (confirmed working via the official
+            // `web-push` CLI against the same keys and subscription). Chrome and Firefox both still accept it.
+            val response = push.send(notification, Encoding.AESGCM)
             val status = response.statusLine.statusCode
             when (status) {
                 in 200..299 -> Outcome(Result.DELIVERED, "accepted by the push service (HTTP $status)")
