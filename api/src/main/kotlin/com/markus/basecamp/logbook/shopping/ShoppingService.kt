@@ -198,11 +198,18 @@ class ShoppingService(
         return list.toResponse()
     }
 
-    /** Upserts the autocomplete pool; called whenever an item is added to any list. */
+    /**
+     * Upserts the autocomplete pool; called whenever an item is added to any list. A new row's useCount already
+     * starts at 1 (this first use), so only an existing row's count is bumped, or the first use would count twice.
+     */
     private fun remember(userId: Long, name: String) {
-        val row = known.findByUserIdAndNameIgnoreCase(userId, name) ?: known.save(KnownShoppingItem(userId, name))
-        row.useCount += 1
-        row.lastUsedAt = Instant.now()
+        val existing = known.findByUserIdAndNameIgnoreCase(userId, name)
+        if (existing != null) {
+            existing.useCount += 1
+            existing.lastUsedAt = Instant.now()
+        } else {
+            known.save(KnownShoppingItem(userId, name))
+        }
     }
 
     private fun touch(list: ShoppingList) {
