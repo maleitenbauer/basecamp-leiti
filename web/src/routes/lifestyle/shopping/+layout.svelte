@@ -1,0 +1,9 @@
+<script lang="ts">
+	import SubmoduleShell from '$lib/components/SubmoduleShell.svelte';
+
+	let { children } = $props();
+</script>
+
+<SubmoduleShell moduleId="lifestyle" submoduleId="shopping">
+	{@render children()}
+</SubmoduleShell>

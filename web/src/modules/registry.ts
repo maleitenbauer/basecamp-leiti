@@ -48,18 +48,25 @@ export const modules: ModuleInfo[] = [
 		]
 	},
 	{
-		id: 'logbook',
-		name: 'Logbook',
-		href: '/logbook',
-		icon: '📓',
-		description: 'Todos, deadlines and reminders',
+		id: 'lifestyle',
+		name: 'Lifestyle',
+		href: '/lifestyle',
+		icon: '🌿',
+		description: 'Todos, shopping and everyday life',
 		submodules: [
 			{
 				id: 'todos',
-				name: 'Todos',
-				href: '/logbook/todos',
+				name: 'Todo List',
+				href: '/lifestyle/todos',
 				description: 'Things to do, with deadlines, notes and daily reminders',
-				pages: [{ id: 'list', name: 'Todo list', href: '/logbook/todos' }]
+				pages: [{ id: 'list', name: 'Todo list', href: '/lifestyle/todos' }]
+			},
+			{
+				id: 'shopping',
+				name: 'Shopping List',
+				href: '/lifestyle/shopping',
+				description: 'Shopping lists with autocomplete, quantities and easy moving between lists',
+				pages: [{ id: 'lists', name: 'Lists', href: '/lifestyle/shopping' }]
 			}
 		]
 	}

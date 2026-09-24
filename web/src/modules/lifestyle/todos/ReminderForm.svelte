@@ -29,7 +29,7 @@
 			}),
 		onSuccess: () => {
 			saved = true;
-			queryClient.invalidateQueries({ queryKey: ['logbook', 'todos', 'reminders'] });
+			queryClient.invalidateQueries({ queryKey: ['lifestyle', 'todos', 'reminders'] });
 		}
 	}));
 
