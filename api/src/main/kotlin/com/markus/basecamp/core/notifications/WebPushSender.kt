@@ -10,7 +10,12 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.math.BigInteger
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse.BodyHandlers
 import java.security.Security
+import java.time.Duration
 import java.util.Base64
 
 /** Sends one encrypted Web Push message. Does nothing (and reports [configured] = false) without VAPID keys. */
@@ -26,6 +31,7 @@ class WebPushSender(
     class Outcome(val result: Result, val detail: String)
 
     private val log = LoggerFactory.getLogger(javaClass)
+    private val httpClient: HttpClient by lazy { HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build() }
 
     val configured: Boolean get() = publicKey.isNotBlank() && privateKey.isNotBlank() && subject.isNotBlank()
 
@@ -90,20 +96,35 @@ class WebPushSender(
                 subscription.auth,
                 payloadJson.toByteArray(Charsets.UTF_8),
             )
-            // Explicitly AESGCM, not the library's default AES128GCM: for FCM endpoints the library silently
-            // rewrites .../fcm/send/<id> to .../wp/<id> when using AES128GCM, and that rewritten endpoint answered
-            // "crypto-key header had invalid format" for us even with a verified-correct key. AESGCM skips the
-            // rewrite and posts to the endpoint exactly as the browser gave it (confirmed working via the official
-            // `web-push` CLI against the same keys and subscription). Chrome and Firefox both still accept it.
-            val response = push.send(notification, Encoding.AESGCM)
-            val status = response.statusLine.statusCode
+            // We let the library build the request (correct encryption + VAPID JWT) but send it ourselves, because
+            // its Crypto-Key header is unpadded base64url and Chrome/FCM has been reported to reject exactly that
+            // with this same "crypto-key header had invalid format" 403 (web-push-libs/webpush-java#212, confirmed
+            // fix: pad it). We tried both of the library's own encodings unmodified first; both failed identically,
+            // which pointed at this header rather than the endpoint rewrite AES128GCM also does.
+            val apachePost = push.preparePost(notification, Encoding.AES128GCM)
+            apachePost.getFirstHeader("Crypto-Key")?.let { header ->
+                apachePost.removeHeaders("Crypto-Key")
+                apachePost.addHeader("Crypto-Key", padBase64Segments(header.value))
+            }
+
+            // headers java.net.http.HttpRequest refuses to set itself (it computes/manages these)
+            val restrictedHeaders = setOf("connection", "content-length", "expect", "host", "upgrade")
+            val requestBuilder = HttpRequest.newBuilder(URI.create(apachePost.uri.toString()))
+            for (header in apachePost.allHeaders) {
+                if (header.name.lowercase() !in restrictedHeaders) requestBuilder.header(header.name, header.value)
+            }
+            val body = apachePost.entity?.let { EntityUtils.toByteArray(it) } ?: ByteArray(0)
+            requestBuilder.POST(HttpRequest.BodyPublishers.ofByteArray(body))
+
+            val response = httpClient.send(requestBuilder.build(), BodyHandlers.ofString())
+            val status = response.statusCode()
             when (status) {
                 in 200..299 -> Outcome(Result.DELIVERED, "accepted by the push service (HTTP $status)")
                 404, 410 -> Outcome(Result.GONE, "the browser dropped this device (HTTP $status), enable push again")
                 else -> {
-                    val body = runCatching { EntityUtils.toString(response.entity) }.getOrNull().orEmpty().take(200)
-                    log.warn("Push service answered HTTP {} for subscription {}: {}", status, subscription.id, body)
-                    Outcome(Result.FAILED, "the push service answered HTTP $status $body".trim())
+                    val body2 = response.body().orEmpty().take(200)
+                    log.warn("Push service answered HTTP {} for subscription {}: {}", status, subscription.id, body2)
+                    Outcome(Result.FAILED, "the push service answered HTTP $status $body2".trim())
                 }
             }
         } catch (e: Exception) {
@@ -111,4 +132,14 @@ class WebPushSender(
             Outcome(Result.FAILED, e.message ?: e.javaClass.simpleName)
         }
     }
+
+    /** "p256ecdsa=XXXX" or "dh=YYYY;p256ecdsa=XXXX" -> the same, with each base64url value padded to a multiple of 4. */
+    private fun padBase64Segments(headerValue: String): String =
+        headerValue.split(";").joinToString(";") { segment ->
+            val separator = segment.indexOf('=')
+            if (separator < 0) return@joinToString segment
+            val name = segment.substring(0, separator)
+            val value = segment.substring(separator + 1)
+            "$name=$value${"=".repeat((4 - value.length % 4) % 4)}"
+        }
 }
