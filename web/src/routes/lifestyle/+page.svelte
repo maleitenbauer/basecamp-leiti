@@ -2,4 +2,4 @@
 	import ModuleHome from '$lib/components/ModuleHome.svelte';
 </script>
 
-<ModuleHome moduleId="logbook" />
+<ModuleHome moduleId="lifestyle" />

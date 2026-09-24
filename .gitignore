@@ -45,3 +45,5 @@ web/src/lib/api/schema.d.ts
 
 # Backups
 backups/
+
+hetzner-info

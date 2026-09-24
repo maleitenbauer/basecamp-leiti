@@ -7,7 +7,7 @@
 	let { todo, now }: { todo: Todo; now: string } = $props();
 
 	const queryClient = useQueryClient();
-	const refresh = () => queryClient.invalidateQueries({ queryKey: ['logbook', 'todos'] });
+	const refresh = () => queryClient.invalidateQueries({ queryKey: ['lifestyle', 'todos'] });
 
 	let editing = $state(false);
 	let title = $state('');

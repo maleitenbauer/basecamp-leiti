@@ -4,6 +4,6 @@
 	let { children } = $props();
 </script>
 
-<SubmoduleShell moduleId="logbook" submoduleId="todos">
+<SubmoduleShell moduleId="lifestyle" submoduleId="todos">
 	{@render children()}
 </SubmoduleShell>

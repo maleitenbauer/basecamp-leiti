@@ -10,7 +10,7 @@
 	const now = today();
 
 	const list = createQuery(() => ({
-		queryKey: ['logbook', 'todos'],
+		queryKey: ['lifestyle', 'todos'],
 		queryFn: () => todosApi.list()
 	}));
 
@@ -18,7 +18,7 @@
 	let showReminders = $state(false);
 
 	const reminders = createQuery(() => ({
-		queryKey: ['logbook', 'todos', 'reminders'],
+		queryKey: ['lifestyle', 'todos', 'reminders'],
 		queryFn: () => todosApi.reminders(),
 		enabled: showReminders
 	}));
@@ -55,7 +55,7 @@
 			dueDate = '';
 			note = '';
 			noteOpen = false;
-			queryClient.invalidateQueries({ queryKey: ['logbook', 'todos'] });
+			queryClient.invalidateQueries({ queryKey: ['lifestyle', 'todos'] });
 		}
 	}));
 </script>
