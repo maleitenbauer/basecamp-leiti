@@ -1,0 +1,16 @@
+# Used by the `api` service's build (docker-compose.yml sets its context to the repo root, since api/Dockerfile
+# also needs the sibling analysis-parser/ directory). The Dockerfile only COPYs api/ and analysis-parser/ into
+# any build stage, so nothing below is a correctness requirement — this just keeps the build context small/fast.
+# web/'s own build context is unaffected; see web/.dockerignore for that.
+.git
+web/node_modules
+web/.svelte-kit
+web/build
+web/dev-dist
+
+api/.gradle
+api/build
+api/.kotlin
+api/bootrun.log
+
+analysis-parser/analysis-parser

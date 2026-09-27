@@ -15,6 +15,10 @@ spring:
   mvc:
     problemdetails:
       enabled: true
+  servlet:
+    multipart:
+      max-file-size: 1GB      # CS2 demos run 50-300+ MB; the actual cap enforced is basecamp.analysis.max-demo-size-bytes
+      max-request-size: 1GB
   session:
     timeout: 90d            # idle timeout, sliding: every request extends it
     jdbc:
@@ -47,6 +51,12 @@ basecamp:
     vapid-public-key: ${VAPID_PUBLIC_KEY:}
     vapid-private-key: ${VAPID_PRIVATE_KEY:}
     subject: ${VAPID_SUBJECT:}   # for example mailto:you@example.com
+
+  analysis:                 # Gaming > CS2 > Analysis: .dem upload and parsing (see analysis-parser/, api/Dockerfile)
+    demo-storage-dir: ${BASECAMP_DEMO_STORAGE_DIR:/data/demos}
+    parser-binary: ${BASECAMP_ANALYSIS_PARSER_BIN:/app/analysis-parser}
+    max-demo-size-bytes: 400000000   # ~400 MB; generous for a long/OT match, well under the 1 GB HTTP cap above
+    parse-timeout-seconds: 300
 
 management:
   endpoints:

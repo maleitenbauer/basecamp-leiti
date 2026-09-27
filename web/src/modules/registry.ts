@@ -42,7 +42,8 @@ export const modules: ModuleInfo[] = [
 				pages: [
 					{ id: 'overview', name: 'Overview', href: '/gaming/cs2' },
 					{ id: 'matches', name: 'Matches', href: '/gaming/cs2/matches' },
-					{ id: 'improvement', name: 'Improvement', href: '/gaming/cs2/improvement' }
+					{ id: 'improvement', name: 'Improvement', href: '/gaming/cs2/improvement' },
+					{ id: 'analysis', name: 'Analysis', href: '/gaming/cs2/analysis' }
 				]
 			}
 		]

@@ -90,3 +90,11 @@ bundled. To use your own, put PNGs in `web/static/maps/` named after the map wit
 The Shopping List's "Import common groceries" action seeds a user's autocomplete pool from a bundled list at
 `api/src/main/resources/data/common-groceries.txt`. See `api/src/main/resources/data/NOTICE.md` for its source
 and license (Apache 2.0).
+
+## CS2 2D demo analysis
+
+Gaming → Counter-Strike 2 → Analysis: upload a `.dem`, see kill/death positions. A third top-level toolchain,
+`analysis-parser/` (Go), compiled by `api/Dockerfile` into a binary the API shells out to — only exists once
+deployed via Docker, not in local dev. See [docs/cs2-analysis.md](docs/cs2-analysis.md) for the full picture:
+why this architecture, what v1 does and doesn't do, how to test the parser locally, and which parts of its
+Go API were not independently verified against source.
