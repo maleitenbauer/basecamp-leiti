@@ -20,8 +20,8 @@ class ParsedDemoJsonTest {
         {
           "map": "de_mirage",
           "rounds": [
-            {"number": 1, "winnerTeam": "CT", "ctScore": 1, "tScore": 0},
-            {"number": 2, "winnerTeam": "", "ctScore": 1, "tScore": 1}
+            {"number": 1, "winnerTeam": "CT", "ctScore": 1, "tScore": 0, "freezeTimeEndTick": 1920},
+            {"number": 2, "winnerTeam": "", "ctScore": 1, "tScore": 1, "freezeTimeEndTick": 9600}
           ],
           "kills": [
             {
@@ -44,6 +44,7 @@ class ParsedDemoJsonTest {
           "grenades": [
             {
               "round": 1, "type": "Flash", "throwerSteamId": "76561198000000001", "throwerName": "me", "throwerTeam": "CT",
+              "throwX": 1.0, "throwY": 2.0, "throwZ": 3.0,
               "detonateX": 10.0, "detonateY": 20.0, "detonateZ": 5.0,
               "trajectory": [{"x": 1.0, "y": 2.0, "z": 3.0}, {"x": 4.0, "y": 5.0, "z": 6.0}]
             }
@@ -76,6 +77,8 @@ class ParsedDemoJsonTest {
 
         assertEquals(1, parsed.grenades.size)
         assertEquals("Flash", parsed.grenades[0].type)
+        assertEquals(1.0, parsed.grenades[0].throwX)
+        assertEquals(10.0, parsed.grenades[0].detonateX)
         assertEquals(2, parsed.grenades[0].trajectory.size)
         assertEquals(6.0, parsed.grenades[0].trajectory[1].z)
 

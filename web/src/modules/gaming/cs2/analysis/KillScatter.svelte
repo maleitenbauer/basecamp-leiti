@@ -1,18 +1,12 @@
-<script module lang="ts">
-	// remember which optional radar images do not exist, so re-rendering this demo doesn't re-request them
-	const missingRadar = new Set<string>();
-</script>
-
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import { mapSlug } from '../matches/maps';
-	import { hasRadarCalibration, worldToRadarPercent } from './radarCalibration';
+	import RadarBackground from './RadarBackground.svelte';
+	import { hasRadarCalibration, makeBboxTransform, worldToRadarPercent } from './radarCalibration';
 	import type { DemoKill } from './types';
 
 	let { kills, map, viewerSteamId }: { kills: DemoKill[]; map: string | null; viewerSteamId: string | null } =
 		$props();
 
-	const slug = $derived(mapSlug(map));
 	const calibrated = $derived(hasRadarCalibration(map));
 
 	const players = $derived.by(() => {
@@ -37,11 +31,8 @@
 	let showKills = $state(true);
 	let showDeaths = $state(true);
 	let onlyHeadshots = $state(false);
-	let size = $state<'sm' | 'md' | 'lg'>('sm');
+	let size = $state<'sm' | 'md' | 'lg'>('lg');
 	const sizePx = { sm: 340, md: 480, lg: 680 };
-
-	let radarFailed = $state(false);
-	const showRadarImage = $derived(calibrated && !radarFailed && !missingRadar.has(slug));
 
 	const passesFilters = (k: DemoKill) => !onlyHeadshots || k.headshot;
 	const myKills = $derived(
@@ -54,26 +45,12 @@
 	// Fallback for maps with no radar calibration: scale to the bounding box of whatever's currently visible,
 	// so a single player's kills/deaths fill the plot instead of being lost in the whole match's spread.
 	const fallbackTransform = $derived.by(() => {
-		const xs: number[] = [];
-		const ys: number[] = [];
+		const points: { x: number; y: number }[] = [];
 		for (const k of showKills ? myKills : []) {
-			if (k.attackerX !== null && k.attackerY !== null) {
-				xs.push(k.attackerX);
-				ys.push(k.attackerY);
-			}
+			if (k.attackerX !== null && k.attackerY !== null) points.push({ x: k.attackerX, y: k.attackerY });
 		}
-		for (const k of showDeaths ? myDeaths : []) {
-			xs.push(k.victimX);
-			ys.push(k.victimY);
-		}
-		const minX = xs.length ? Math.min(...xs) : 0;
-		const maxX = xs.length ? Math.max(...xs) : 1;
-		const minY = ys.length ? Math.min(...ys) : 0;
-		const maxY = ys.length ? Math.max(...ys) : 1;
-		const spanX = maxX - minX || 1;
-		const spanY = maxY - minY || 1;
-		// SVG y grows downward; game Y typically grows "north", so flip it for a more intuitive top-down feel.
-		return (x: number, y: number): [number, number] => [((x - minX) / spanX) * 100, 100 - ((y - minY) / spanY) * 100];
+		for (const k of showDeaths ? myDeaths : []) points.push({ x: k.victimX, y: k.victimY });
+		return makeBboxTransform(points);
 	});
 
 	function point(x: number, y: number): [number, number] {
@@ -125,27 +102,10 @@
 	</div>
 
 	<div
-		class="relative aspect-square overflow-hidden rounded-lg border border-slate-700 bg-slate-950"
+		class="relative mx-auto aspect-square overflow-hidden rounded-lg border border-slate-700 bg-slate-950"
 		style="width: {sizePx[size]}px; max-width: 100%;"
 	>
-		{#if showRadarImage}
-			<img
-				src="/maps/radar/{slug}.png"
-				alt=""
-				class="absolute inset-0 h-full w-full object-cover"
-				onerror={() => {
-					missingRadar.add(slug);
-					radarFailed = true;
-				}}
-			/>
-		{:else if !calibrated}
-			<svg viewBox="0 0 100 100" class="absolute inset-0 h-full w-full text-slate-700" aria-hidden="true">
-				{#each [20, 40, 60, 80] as g (g)}
-					<line x1={g} y1="0" x2={g} y2="100" stroke="currentColor" stroke-width="0.2" />
-					<line x1="0" y1={g} x2="100" y2={g} stroke="currentColor" stroke-width="0.2" />
-				{/each}
-			</svg>
-		{/if}
+		<RadarBackground {map} />
 
 		<svg viewBox="0 0 100 100" class="absolute inset-0 h-full w-full">
 			{#if showKills}
@@ -170,9 +130,7 @@
 	</div>
 	<p class="text-xs text-slate-500">
 		{#if calibrated}
-			Real {map} coordinates.{!showRadarImage
-				? ` Add your own radar image at web/static/maps/radar/${slug}.png to see it as the background.`
-				: ''}
+			Real {map} coordinates.
 		{:else}
 			{map ? `No radar calibration for ${map} yet — showing` : 'Showing'} an abstract grid scaled to what's currently
 			visible, not a real map layout.

@@ -1,7 +1,7 @@
 # CS2 2D demo analysis
 
-Gaming → Counter-Strike 2 → Analysis. Upload a `.dem` from a match, get kill/death positions (v1: a plain
-coordinate-grid scatter) plus data stored for an animated 2D replay later.
+Gaming → Counter-Strike 2 → Analysis. Upload a `.dem` from a match, get kill/death positions on a real map radar,
+and watch an animated replay of any round.
 
 ## Why this architecture
 
@@ -36,11 +36,24 @@ the Matches map banners). Put your own at `web/static/maps/radar/<slug>.png` (sl
 `de_`/`cs_` prefix, e.g. `mirage.png`) and it's picked up automatically; without an image, calibrated demos still
 plot on the correct real-world-relative grid, just with no background art.
 
+**Animated round replay.** `GET /api/gaming/cs2/analysis/demos/{id}/rounds/{round}/positions` returns that round's
+raw position snapshots; `RoundReplay.svelte` groups them by tick into frames and plays them back (play/pause,
+0.5x-4x speed, a scrubber, and a round picker) on the same radar background as the kill scatter view. `dead`
+players are hidden per-frame rather than shown grayed out, matching what you'd actually see spectating. Each
+round starts right after buy/freeze time ends (`events.RoundFreezetimeEnd`'s tick, stored per round), not at the
+spawn standoff.
+
+**Grenade lineups.** `GrenadeLineups.svelte` plots every throw's full flight path (hollow circle = thrown from
+here, filled circle = landed here, line = actual trajectory), filterable by thrower and grenade type. The throw
+origin isn't a separately tracked event — it's simply the first point of the trajectory we already store (see
+`GrenadeProjectile.Trajectory`'s own doc-comment: "list of all known locations ... up to the current point",
+recorded by the library from the moment the projectile exists).
+
 Deliberately not implemented, listed here so nobody assumes it silently works:
 
-- **No animated replay UI.** The position-snapshot data needed for it is already being collected and stored
-  (`gaming.cs2_demo_position`), so this is a frontend-only follow-up, not a data-model change.
-- **No damage events, bomb plant/defuse, or full per-tick resolution** (positions are sampled, not every tick).
+- **No damage events, bomb plant/defuse, or full per-tick resolution** (positions are sampled ~1/second, not
+  every tick — both the kill scatter and the replay inherit this; the replay interpolates nothing between frames,
+  it just steps from sample to sample).
 
 ## Local development
 

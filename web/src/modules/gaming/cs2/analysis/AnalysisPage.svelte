@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { createMutation, createQuery, useQueryClient } from '@tanstack/svelte-query';
 	import { analysisApi } from './api';
+	import GrenadeLineups from './GrenadeLineups.svelte';
 	import KillScatter from './KillScatter.svelte';
+	import RoundReplay from './RoundReplay.svelte';
 	import { formatBytes, type DemoStatus } from './types';
 
 	const queryClient = useQueryClient();
@@ -20,6 +22,7 @@
 	}));
 
 	let selectedId = $state<number | null>(null);
+	let view = $state<'kills' | 'replay' | 'grenades'>('kills');
 	const analysis = createQuery(() => ({
 		queryKey: ['gaming', 'cs2', 'analysis', 'demos', selectedId],
 		queryFn: () => analysisApi.getAnalysis(selectedId!),
@@ -68,8 +71,7 @@
 	<div>
 		<h2 class="text-lg font-semibold">2D Analysis</h2>
 		<p class="mt-1 text-sm text-slate-400">
-			Upload a .dem from a match and see where you get kills and deaths. Round-by-round position data is
-			stored too, for an animated replay in a later update.
+			Upload a .dem from a match, see where you get kills and deaths, and watch an animated replay of any round.
 		</p>
 	</div>
 
@@ -107,7 +109,11 @@
 				<li class="p-3">
 					<div class="flex flex-wrap items-center gap-3">
 						<button
-							onclick={() => (selectedId = demo.status === 'READY' ? demo.id : selectedId)}
+							onclick={() => {
+								if (demo.status !== 'READY') return;
+								selectedId = demo.id;
+								view = 'kills';
+							}}
 							disabled={demo.status !== 'READY'}
 							class="min-w-0 flex-1 truncate text-left text-sm {demo.status === 'READY'
 								? 'hover:text-brand-400'
@@ -144,11 +150,52 @@
 							{:else if analysis.isError}
 								<p class="text-sm text-red-400">{analysis.error.message}</p>
 							{:else}
-								<KillScatter
-									kills={analysis.data.kills}
-									map={analysis.data.map}
-									viewerSteamId={analysis.data.viewerSteamId}
-								/>
+								<div class="mb-3 flex gap-1 text-xs">
+									<button
+										onclick={() => (view = 'kills')}
+										class="rounded px-2 py-1 {view === 'kills'
+											? 'bg-brand-500/20 text-brand-300'
+											: 'text-slate-400 hover:bg-slate-800'}"
+									>
+										Kills
+									</button>
+									<button
+										onclick={() => (view = 'replay')}
+										class="rounded px-2 py-1 {view === 'replay'
+											? 'bg-brand-500/20 text-brand-300'
+											: 'text-slate-400 hover:bg-slate-800'}"
+									>
+										Replay
+									</button>
+									<button
+										onclick={() => (view = 'grenades')}
+										class="rounded px-2 py-1 {view === 'grenades'
+											? 'bg-brand-500/20 text-brand-300'
+											: 'text-slate-400 hover:bg-slate-800'}"
+									>
+										Grenades
+									</button>
+								</div>
+								{#if view === 'kills'}
+									<KillScatter
+										kills={analysis.data.kills}
+										map={analysis.data.map}
+										viewerSteamId={analysis.data.viewerSteamId}
+									/>
+								{:else if view === 'replay'}
+									<RoundReplay
+										demoId={demo.id}
+										map={analysis.data.map}
+										rounds={analysis.data.rounds}
+										viewerSteamId={analysis.data.viewerSteamId}
+									/>
+								{:else}
+									<GrenadeLineups
+										grenades={analysis.data.grenades}
+										map={analysis.data.map}
+										viewerSteamId={analysis.data.viewerSteamId}
+									/>
+								{/if}
 								<p class="mt-2 text-xs text-slate-500">
 									{analysis.data.rounds.length} rounds parsed. Grenades: {analysis.data.grenades.length}.
 								</p>

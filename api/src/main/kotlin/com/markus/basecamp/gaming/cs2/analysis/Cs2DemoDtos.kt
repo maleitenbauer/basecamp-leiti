@@ -6,7 +6,14 @@ import java.time.Instant
 // ---- what analysis-parser prints as JSON on stdout (see analysis-parser/main.go's `result` struct) ----
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-data class ParsedRound(val number: Int, val winnerTeam: String?, val ctScore: Int, val tScore: Int)
+data class ParsedRound(
+    val number: Int,
+    val winnerTeam: String?,
+    val ctScore: Int,
+    val tScore: Int,
+    /** 0 (Go's int zero value) if the parser never saw a RoundFreezetimeEnd event for this round. */
+    val freezeTimeEndTick: Int,
+)
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class ParsedKill(
@@ -39,6 +46,9 @@ data class ParsedGrenade(
     val throwerSteamId: String?,
     val throwerName: String?,
     val throwerTeam: String?,
+    val throwX: Double?,
+    val throwY: Double?,
+    val throwZ: Double?,
     val detonateX: Double?,
     val detonateY: Double?,
     val detonateZ: Double?,
@@ -99,18 +109,41 @@ data class DemoKillResponse(
     val headshot: Boolean,
 )
 
-data class DemoRoundResponse(val number: Int, val winnerTeam: String?, val ctScore: Int, val tScore: Int)
+data class DemoRoundResponse(
+    val number: Int,
+    val winnerTeam: String?,
+    val ctScore: Int,
+    val tScore: Int,
+    val freezeTimeEndTick: Int?,
+)
+
+data class DemoGrenadeTrajectoryPointResponse(val x: Double, val y: Double)
 
 data class DemoGrenadeResponse(
     val round: Int,
     val type: String,
+    val throwerSteamId: String?,
     val throwerName: String?,
     val throwerTeam: String?,
+    val throwX: Double?,
+    val throwY: Double?,
     val detonateX: Double?,
     val detonateY: Double?,
+    val trajectory: List<DemoGrenadeTrajectoryPointResponse>,
 )
 
-/** Everything needed for the static (v1) analysis views: kills, rounds and grenade end-points, but not full trajectories. */
+data class DemoPositionResponse(
+    val tick: Int,
+    val steamId: String,
+    val name: String,
+    val team: String,
+    val x: Double,
+    val y: Double,
+    val health: Int,
+    val alive: Boolean,
+)
+
+/** Everything needed for the static (v1) analysis views: kills, rounds, and grenades (throw/detonate points plus full flight trajectory). */
 data class DemoAnalysisResponse(
     val map: String?,
     val rounds: List<DemoRoundResponse>,

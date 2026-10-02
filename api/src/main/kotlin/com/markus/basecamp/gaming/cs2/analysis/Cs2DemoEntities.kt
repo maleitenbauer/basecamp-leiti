@@ -61,6 +61,8 @@ class Cs2DemoRound(
 
     @Column(nullable = false)
     val tScore: Int,
+
+    val freezeTimeEndTick: Int?,
 ) {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -140,6 +142,12 @@ class Cs2DemoGrenade(
     val throwerTeam: String?,
 
     // Explicit names needed for the same trailing-single-capital reason as Cs2DemoKill's attacker/victim X/Y/Z.
+    @Column(name = "throw_x")
+    val throwX: Double?,
+    @Column(name = "throw_y")
+    val throwY: Double?,
+    @Column(name = "throw_z")
+    val throwZ: Double?,
     @Column(name = "detonate_x")
     val detonateX: Double?,
     @Column(name = "detonate_y")

@@ -32,26 +32,30 @@ type roundResult struct {
 	WinnerTeam string `json:"winnerTeam"` // "CT", "T" or "" for a tie/no winner
 	CtScore    int    `json:"ctScore"`
 	TScore     int    `json:"tScore"`
+	// Tick at which buy/freeze time ended and players could actually move, or 0 if events.RoundFreezetimeEnd
+	// never fired for this round (shouldn't normally happen). Lets consumers skip straight to the "real" start
+	// of a round instead of replaying the freeze-time standoff at spawn.
+	FreezeTimeEndTick int `json:"freezeTimeEndTick"`
 }
 
 type killEvent struct {
-	Round           int     `json:"round"`
-	Tick            int     `json:"tick"`
-	AttackerSteamID *string `json:"attackerSteamId"`
-	AttackerName    *string `json:"attackerName"`
-	AttackerTeam    *string `json:"attackerTeam"`
+	Round           int      `json:"round"`
+	Tick            int      `json:"tick"`
+	AttackerSteamID *string  `json:"attackerSteamId"`
+	AttackerName    *string  `json:"attackerName"`
+	AttackerTeam    *string  `json:"attackerTeam"`
 	AttackerX       *float64 `json:"attackerX"`
 	AttackerY       *float64 `json:"attackerY"`
 	AttackerZ       *float64 `json:"attackerZ"`
-	VictimSteamID   *string `json:"victimSteamId"`
-	VictimName      *string `json:"victimName"`
-	VictimTeam      *string `json:"victimTeam"`
-	VictimX         float64 `json:"victimX"`
-	VictimY         float64 `json:"victimY"`
-	VictimZ         float64 `json:"victimZ"`
-	Weapon          string  `json:"weapon"`
-	Headshot        bool    `json:"headshot"`
-	Wallbang        bool    `json:"wallbang"`
+	VictimSteamID   *string  `json:"victimSteamId"`
+	VictimName      *string  `json:"victimName"`
+	VictimTeam      *string  `json:"victimTeam"`
+	VictimX         float64  `json:"victimX"`
+	VictimY         float64  `json:"victimY"`
+	VictimZ         float64  `json:"victimZ"`
+	Weapon          string   `json:"weapon"`
+	Headshot        bool     `json:"headshot"`
+	Wallbang        bool     `json:"wallbang"`
 }
 
 type trajectoryPoint struct {
@@ -61,15 +65,22 @@ type trajectoryPoint struct {
 }
 
 type grenadeEvent struct {
-	Round           int               `json:"round"`
-	Type            string            `json:"type"`
-	ThrowerSteamID  *string           `json:"throwerSteamId"`
-	ThrowerName     *string           `json:"throwerName"`
-	ThrowerTeam     *string           `json:"throwerTeam"`
-	DetonateX       float64           `json:"detonateX"`
-	DetonateY       float64           `json:"detonateY"`
-	DetonateZ       float64           `json:"detonateZ"`
-	Trajectory      []trajectoryPoint `json:"trajectory"`
+	Round          int     `json:"round"`
+	Type           string  `json:"type"`
+	ThrowerSteamID *string `json:"throwerSteamId"`
+	ThrowerName    *string `json:"throwerName"`
+	ThrowerTeam    *string `json:"throwerTeam"`
+	// The thrower's position at throw time — the first point of Trajectory, not a separately tracked event.
+	// GrenadeProjectile.Trajectory ("list of all known locations ... up to the current point", per the
+	// library's own doc-comment) is recorded by the library from the moment the projectile exists, so its
+	// first entry is already the throw origin.
+	ThrowX     float64           `json:"throwX"`
+	ThrowY     float64           `json:"throwY"`
+	ThrowZ     float64           `json:"throwZ"`
+	DetonateX  float64           `json:"detonateX"`
+	DetonateY  float64           `json:"detonateY"`
+	DetonateZ  float64           `json:"detonateZ"`
+	Trajectory []trajectoryPoint `json:"trajectory"`
 }
 
 type positionSnapshot struct {
@@ -128,16 +139,23 @@ func parse(demoPath string) (*result, error) {
 	round := 0 // 1-based once the first round starts; see the RoundEnd handler below for the same cheap
 	// round-counting approach demoinfocs-golang's own examples use (does not handle match restarts).
 	grenadesInFlight := map[int64]*grenadeEvent{}
+	freezeTimeEndTick := 0 // set by RoundFreezetimeEnd, consumed and reset by the next RoundEnd
 
 	p.RegisterNetMessageHandler(func(m *msg.CSVCMsg_ServerInfo) {
 		out.Map = m.GetMapName()
 	})
 
-	p.RegisterEventHandler(func(e events.Kill) {
-		round++ // rounds are 1-based; guaranteed >=1 here since kills only happen mid-round
+	p.RegisterEventHandler(func(events.RoundFreezetimeEnd) {
+		freezeTimeEndTick = p.GameState().IngameTick()
+	})
 
+	p.RegisterEventHandler(func(e events.Kill) {
+		// Read only — round is advanced solely by the RoundEnd handler below. An earlier version of this file
+		// incorrectly did `round++` here too, incrementing the shared counter on every kill instead of once per
+		// round; that inflated round numbers on kills/grenades/positions to well past the real round count
+		// (e.g. "round 118" in an 18-round match) and broke the round-based position lookup used by the replay.
 		k := killEvent{
-			Round: round,
+			Round: max(round, 1),
 			Tick:  p.GameState().IngameTick(),
 			// %v matches how demoinfocs-golang's own print-events example formats a weapon (see e.Weapon in
 			// examples/print-events); safer than assuming a `.String()` method name we haven't verified.
@@ -182,8 +200,11 @@ func parse(demoPath string) (*result, error) {
 			winner = "T"
 			tScore++
 		}
-		out.Rounds = append(out.Rounds, roundResult{Number: round, WinnerTeam: winner, CtScore: ctScore, TScore: tScore})
+		out.Rounds = append(out.Rounds, roundResult{
+			Number: round, WinnerTeam: winner, CtScore: ctScore, TScore: tScore, FreezeTimeEndTick: freezeTimeEndTick,
+		})
 		round++
+		freezeTimeEndTick = 0
 	})
 
 	p.RegisterEventHandler(func(e events.GrenadeProjectileDestroy) {
@@ -203,6 +224,8 @@ func parse(demoPath string) (*result, error) {
 			g.Trajectory = append(g.Trajectory, trajectoryPoint{X: point.Position.X, Y: point.Position.Y, Z: point.Position.Z})
 		}
 		if len(g.Trajectory) > 0 {
+			first := g.Trajectory[0]
+			g.ThrowX, g.ThrowY, g.ThrowZ = first.X, first.Y, first.Z
 			last := g.Trajectory[len(g.Trajectory)-1]
 			g.DetonateX, g.DetonateY, g.DetonateZ = last.X, last.Y, last.Z
 		}

@@ -34,6 +34,9 @@ class Cs2DemoController(
     @GetMapping("/demos/{id}")
     fun getAnalysis(@PathVariable id: Long) = service.getAnalysis(userId, id)
 
+    @GetMapping("/demos/{id}/rounds/{round}/positions")
+    fun getRoundPositions(@PathVariable id: Long, @PathVariable round: Int) = service.getRoundPositions(userId, id, round)
+
     @PostMapping("/demos/{id}/retry")
     fun retry(@PathVariable id: Long) = service.retry(userId, id)
 

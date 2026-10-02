@@ -1,5 +1,7 @@
 package com.markus.basecamp.gaming.cs2.analysis
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.markus.basecamp.gaming.cs2.matches.MatchProfileRepository
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -21,9 +23,11 @@ class Cs2DemoService(
     private val rounds: Cs2DemoRoundRepository,
     private val kills: Cs2DemoKillRepository,
     private val grenades: Cs2DemoGrenadeRepository,
+    private val positions: Cs2DemoPositionRepository,
     private val asyncParser: Cs2DemoAsyncParser,
     private val parserProcess: Cs2DemoParserProcess,
     private val matchProfiles: MatchProfileRepository,
+    private val mapper: ObjectMapper,
     @Value("\${basecamp.analysis.demo-storage-dir}") private val storageDir: String,
     @Value("\${basecamp.analysis.max-demo-size-bytes}") private val maxSizeBytes: Long,
 ) {
@@ -84,7 +88,9 @@ class Cs2DemoService(
         }
         return DemoAnalysisResponse(
             map = demo.map,
-            rounds = rounds.findAllByDemoIdOrderByRoundNumberAsc(demoId).map { DemoRoundResponse(it.roundNumber, it.winnerTeam, it.ctScore, it.tScore) },
+            rounds = rounds.findAllByDemoIdOrderByRoundNumberAsc(demoId).map {
+                DemoRoundResponse(it.roundNumber, it.winnerTeam, it.ctScore, it.tScore, it.freezeTimeEndTick)
+            },
             kills = kills.findAllByDemoIdOrderByRoundNumberAscTickAsc(demoId).map {
                 DemoKillResponse(
                     it.roundNumber, it.attackerSteamId, it.attackerName, it.attackerTeam, it.attackerX, it.attackerY,
@@ -92,10 +98,24 @@ class Cs2DemoService(
                 )
             },
             grenades = grenades.findAllByDemoIdOrderByRoundNumberAsc(demoId).map {
-                DemoGrenadeResponse(it.roundNumber, it.type, it.throwerName, it.throwerTeam, it.detonateX, it.detonateY)
+                DemoGrenadeResponse(
+                    it.roundNumber, it.type, it.throwerSteamId, it.throwerName, it.throwerTeam,
+                    it.throwX, it.throwY, it.detonateX, it.detonateY,
+                    mapper.readValue<List<ParsedTrajectoryPoint>>(it.trajectory).map { pt -> DemoGrenadeTrajectoryPointResponse(pt.x, pt.y) },
+                )
             },
             viewerSteamId = matchProfiles.findById(userId).orElse(null)?.steam64Id,
         )
+    }
+
+    @Transactional(readOnly = true)
+    fun getRoundPositions(userId: Long, demoId: Long, round: Int): List<DemoPositionResponse> {
+        val demo = findDemo(userId, demoId)
+        if (demo.status != DemoStatus.READY) {
+            throw ResponseStatusException(HttpStatus.CONFLICT, "This demo is not ready yet (status: ${demo.status})")
+        }
+        return positions.findAllByDemoIdAndRoundNumberOrderByTickAsc(demoId, round)
+            .map { DemoPositionResponse(it.tick, it.steamId, it.name, it.team, it.x, it.y, it.health, it.alive) }
     }
 
     /** Re-runs parsing, e.g. after a parser bugfix; only possible while the raw file is still on disk (a FAILED demo). */

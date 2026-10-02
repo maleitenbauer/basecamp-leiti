@@ -45,3 +45,22 @@ export function worldToRadarPercent(map: string | null, x: number, y: number): {
 export function hasRadarCalibration(map: string | null): boolean {
 	return mapSlug(map) in CALIBRATION;
 }
+
+/**
+ * Fallback for uncalibrated maps: scale a set of world (x, y) points to fill the 0-100 plot area, so a demo or
+ * round still shows relative positions/movement even without real map coordinates.
+ */
+export function makeBboxTransform(
+	points: { x: number; y: number }[]
+): (x: number, y: number) => [number, number] {
+	const xs = points.map((p) => p.x);
+	const ys = points.map((p) => p.y);
+	const minX = xs.length ? Math.min(...xs) : 0;
+	const maxX = xs.length ? Math.max(...xs) : 1;
+	const minY = ys.length ? Math.min(...ys) : 0;
+	const maxY = ys.length ? Math.max(...ys) : 1;
+	const spanX = maxX - minX || 1;
+	const spanY = maxY - minY || 1;
+	// SVG y grows downward; game Y typically grows "north", so flip it for a more intuitive top-down feel.
+	return (x, y) => [((x - minX) / spanX) * 100, 100 - ((y - minY) / spanY) * 100];
+}

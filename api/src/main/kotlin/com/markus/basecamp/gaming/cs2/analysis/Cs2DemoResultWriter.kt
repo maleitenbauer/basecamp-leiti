@@ -33,7 +33,11 @@ class Cs2DemoResultWriter(
         grenades.deleteAllByDemoId(demoId)
         positions.deleteAllByDemoId(demoId)
 
-        rounds.saveAll(parsed.rounds.map { Cs2DemoRound(demoId, it.number, it.winnerTeam, it.ctScore, it.tScore) })
+        rounds.saveAll(
+            parsed.rounds.map {
+                Cs2DemoRound(demoId, it.number, it.winnerTeam, it.ctScore, it.tScore, it.freezeTimeEndTick.takeIf { tick -> tick > 0 })
+            },
+        )
         kills.saveAll(
             parsed.kills.map {
                 Cs2DemoKill(
@@ -48,6 +52,7 @@ class Cs2DemoResultWriter(
             parsed.grenades.map {
                 Cs2DemoGrenade(
                     demoId, it.round, it.type, it.throwerSteamId, it.throwerName, it.throwerTeam,
+                    it.throwX, it.throwY, it.throwZ,
                     it.detonateX, it.detonateY, it.detonateZ, mapper.writeValueAsString(it.trajectory),
                 )
             },
