@@ -10,10 +10,14 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.mock.web.MockMultipartFile
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
 import org.springframework.web.server.ResponseStatusException
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import java.nio.file.Files
+import java.nio.file.Path
 
 /**
  * Runs the whole app against a real Postgres, so the V7 migration and Hibernate schema validation are exercised
@@ -39,6 +43,16 @@ class Cs2DemoIntegrationTests {
         @ServiceConnection
         @JvmStatic
         val postgres = PostgreSQLContainer<Nothing>("postgres:17")
+
+        // The default storage dir (/data/demos) only exists, and is only writable, inside the deployed Docker
+        // image; on a CI runner creating it fails, which would mark every upload FAILED before parsing even starts.
+        private val demoStorageDir: Path = Files.createTempDirectory("basecamp-demos-test")
+
+        @JvmStatic
+        @DynamicPropertySource
+        fun storageProperties(registry: DynamicPropertyRegistry) {
+            registry.add("basecamp.analysis.demo-storage-dir") { demoStorageDir.toString() }
+        }
     }
 
     @Autowired
