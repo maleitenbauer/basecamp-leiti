@@ -68,6 +68,16 @@ export const modules: ModuleInfo[] = [
 				href: '/lifestyle/shopping',
 				description: 'Shopping lists with autocomplete, quantities and easy moving between lists',
 				pages: [{ id: 'lists', name: 'Lists', href: '/lifestyle/shopping' }]
+			},
+			{
+				id: 'fitness',
+				name: 'Fitness',
+				href: '/lifestyle/fitness',
+				description: 'Daily calorie goal and meal log with your own food library; training tracker coming soon',
+				pages: [
+					{ id: 'nutrition', name: 'Nutrition', href: '/lifestyle/fitness' },
+					{ id: 'training', name: 'Training', href: '/lifestyle/fitness/training' }
+				]
 			}
 		]
 	}

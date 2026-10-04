@@ -58,6 +58,11 @@ basecamp:
     max-demo-size-bytes: 400000000   # ~400 MB; generous for a long/OT match, well under the 1 GB HTTP cap above
     parse-timeout-seconds: 300
 
+  openfoodfacts:            # Lifestyle > Fitness > Nutrition: optional online lookup of kcal per 100 g (open data, ODbL)
+    search-url: https://search.openfoodfacts.org
+    product-url: https://world.openfoodfacts.org
+    user-agent: Basecamp/1.0 (self-hosted personal app)
+
 management:
   endpoints:
     web:

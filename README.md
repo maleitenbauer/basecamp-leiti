@@ -98,3 +98,8 @@ Gaming → Counter-Strike 2 → Analysis: upload a `.dem`, see kill/death positi
 deployed via Docker, not in local dev. See [docs/cs2-analysis.md](docs/cs2-analysis.md) for the full picture:
 why this architecture, what v1 does and doesn't do, how to test the parser locally, and which parts of its
 Go API were not independently verified against source.
+
+## Lifestyle > Fitness
+
+A calorie goal, a meal log with your own food library (optionally filled from Open Food Facts), and a placeholder
+training page. See [docs/fitness.md](docs/fitness.md).
