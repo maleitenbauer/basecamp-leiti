@@ -21,7 +21,9 @@ services:
       retries: 10
 
   api:
-    build: ./api
+    build:
+      context: .              # needs both api/ and analysis-parser/ (see api/Dockerfile)
+      dockerfile: api/Dockerfile
     restart: unless-stopped
     depends_on:
       postgres:
@@ -42,6 +44,8 @@ services:
       VAPID_SUBJECT: ${VAPID_SUBJECT:-}
     security_opt:
       - no-new-privileges:true
+    volumes:
+      - demodata:/data/demos  # uploaded .dem files; deleted right after a successful parse (see Cs2AnalysisService)
     ports:
       - "127.0.0.1:8080:8080"
 
@@ -57,3 +61,4 @@ services:
 
 volumes:
   pgdata:
+  demodata:

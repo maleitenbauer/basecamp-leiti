@@ -115,3 +115,13 @@ The runner's checkout lives in `/opt/basecamp/actions-runner/_work/basecamp-leit
 - Todo reminders run every minute on the server, in each user's own time zone (saved from the browser). Each user chooses the
   time and whether "due today" and "overdue" are included under **Logbook → Todos → Reminders**.
 - Locally the service worker is not active in dev mode. Test push on the deployed HTTPS URL, or run `pnpm build && pnpm preview`.
+
+## CS2 2D demo analysis
+
+- Uploaded `.dem` files live on a new `demodata` Docker volume, separate from Postgres's `pgdata`. Only kept on
+  disk until parsing succeeds (then deleted) or if parsing fails (kept, so it can be retried without
+  re-uploading) — disk usage should stay small in normal use, but a user who repeatedly uploads large demos that
+  keep failing to parse could accumulate real disk usage; nothing currently caps this automatically.
+- No extra configuration is needed to deploy this: `api/Dockerfile` builds the Go parser binary as part of the
+  normal `docker compose ... up -d --build` step already used for every deploy.
+- See [docs/cs2-analysis.md](cs2-analysis.md) for the feature itself.

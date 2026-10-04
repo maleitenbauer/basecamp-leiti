@@ -38,6 +38,20 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm build
 
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+          # go.sum isn't committed yet (no Go toolchain was available to generate it) - `go mod tidy` below
+          # creates it; caching just starts cold-then-warm rather than needing this dependency path yet.
+          cache: false
+      - name: Analysis parser build and tests
+        working-directory: analysis-parser
+        run: |
+          go mod tidy
+          go vet ./...
+          go build ./...
+          go test ./...
+
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: test
