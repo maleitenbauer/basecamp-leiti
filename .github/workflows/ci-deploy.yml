@@ -40,7 +40,7 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.23"
+          go-version: "1.24"
           # go.sum isn't committed yet (no Go toolchain was available to generate it) - `go mod tidy` below
           # creates it; caching just starts cold-then-warm rather than needing this dependency path yet.
           cache: false

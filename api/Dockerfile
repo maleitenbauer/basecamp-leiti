@@ -9,7 +9,7 @@ RUN chmod +x gradlew && ./gradlew --no-daemon bootJar -x test
 
 # A static binary: no Go runtime needed in the final image, just the compiled executable (same "ship only the
 # build output" idea as the two stages above). CGO_ENABLED=0 avoids any dependency on the base image's libc.
-FROM golang:1.23-bookworm AS parser-build
+FROM golang:1.24-bookworm AS parser-build
 WORKDIR /src
 COPY analysis-parser/ .
 RUN go mod tidy && CGO_ENABLED=0 go build -o /out/analysis-parser .
