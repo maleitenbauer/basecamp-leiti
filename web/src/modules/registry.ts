@@ -70,6 +70,13 @@ export const modules: ModuleInfo[] = [
 				pages: [{ id: 'lists', name: 'Lists', href: '/lifestyle/shopping' }]
 			},
 			{
+				id: 'routine',
+				name: 'Routine',
+				href: '/lifestyle/routine',
+				description: 'Daily and weekly routines, timed or just checked off, with a reminder of what is still open',
+				pages: [{ id: 'routines', name: 'Routines', href: '/lifestyle/routine' }]
+			},
+			{
 				id: 'fitness',
 				name: 'Fitness',
 				href: '/lifestyle/fitness',

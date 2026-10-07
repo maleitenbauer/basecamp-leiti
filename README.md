@@ -103,3 +103,8 @@ Go API were not independently verified against source.
 
 A calorie goal, a meal log with your own food library (optionally filled from Open Food Facts), and a placeholder
 training page. See [docs/fitness.md](docs/fitness.md).
+
+## Lifestyle > Routine
+
+Daily and weekly routines (timed or just checked off) with a configurable daily reminder of what is still open.
+See [docs/routine.md](docs/routine.md).
