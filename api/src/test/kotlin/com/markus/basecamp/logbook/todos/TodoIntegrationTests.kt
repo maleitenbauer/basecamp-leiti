@@ -148,7 +148,7 @@ class TodoIntegrationTests {
         assertTrue(message.body!!.contains("Today: Due today"))
         assertFalse(message.body!!.contains("Later"))
         assertFalse(message.body!!.contains("Finished late"))
-        assertEquals("/logbook/todos", message.url)
+        assertEquals("/lifestyle/todos", message.url)
 
         // the same day, later: not again
         reminders.runDue(Instant.parse("2090-01-15T15:00:00Z"))
