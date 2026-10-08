@@ -24,9 +24,8 @@ scripts\dev.ps1 web stop        # start | stop | restart | status
 scripts\dev.ps1 all status
 ```
 
-The home page shows a **Backend** card: green "Reachable" means the browser, dev proxy, API and
-Spring are all working. You can also check directly: <http://localhost:8080/api/ping> and
-<http://localhost:8080/actuator/health>.
+To check the backend is up: <http://localhost:8080/api/ping> and <http://localhost:8080/actuator/health>
+(`run-dev.ps1` waits for `/api/ping` before it opens the browser).
 
 Local dev uses a native PostgreSQL service (superuser `postgres`/`postgres`, app DB and user `basecamp`/`basecamp`,
 localhost only). Docker is only needed for the production deploy.
@@ -108,3 +107,9 @@ training page. See [docs/fitness.md](docs/fitness.md).
 
 Daily and weekly routines (timed or just checked off) with a configurable daily reminder of what is still open.
 See [docs/routine.md](docs/routine.md).
+
+## Home dashboard
+
+The home page shows an overall "done today" bar and a tile per module (routines, todos, calories, shopping, CS2
+practice), which you can drag into order and hide; the layout is saved to your account. A new module gets a tile by
+adding one `*.widget.ts` file. See [docs/dashboard.md](docs/dashboard.md).
