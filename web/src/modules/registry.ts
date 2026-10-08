@@ -1,7 +1,9 @@
 /**
- * Every frontend module registers itself here. The navigation, the dashboard and the submodule tabs are all
+ * Every frontend module registers itself here. The navigation, the module cards and the submodule tabs are all
  * built from this tree:  module -> submodules -> pages (tabs).
  * To add a submodule: add an entry below and create the routes under src/routes/<module>/<submodule>/.
+ * To also get a tile on the home dashboard, add a `<name>.widget.ts` next to the module's code (see docs/dashboard.md);
+ * that one needs no entry here, it is discovered automatically.
  */
 export interface PageInfo {
 	id: string;
