@@ -2,6 +2,7 @@
 	import { onDestroy } from 'svelte';
 	import { flip } from 'svelte/animate';
 	import { prettyDate, today } from '$lib/dates';
+	import { dashboardGreeting } from '$lib/greetings';
 	import DashboardCustomize from './DashboardCustomize.svelte';
 	import TodayProgress from './TodayProgress.svelte';
 	import WidgetCard from './WidgetCard.svelte';
@@ -14,7 +15,6 @@
 	let customizing = $state(false);
 
 	const hour = new Date().getHours();
-	const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
 	// ---- today's overall progress: every tile that contributes, except the ones switched off ----
 
@@ -27,6 +27,21 @@
 			if (layout.isHidden(widget.id)) return [];
 			const progress = read();
 			return progress && progress.total > 0 ? [{ id: widget.id, title: widget.title, ...progress }] : [];
+		})
+	);
+
+	// Known once every tile that's switched on has reported. Until then the welcome line stays neutral, instead of
+	// claiming "nothing planned" just because the numbers haven't loaded yet.
+	const progressKnown = $derived(
+		layout.ready && sources.every(({ widget, read }) => layout.isHidden(widget.id) || read() !== null)
+	);
+	const greeting = $derived(
+		dashboardGreeting({
+			hour,
+			date: today(),
+			progress: progressKnown
+				? { done: parts.reduce((sum, p) => sum + p.done, 0), total: parts.reduce((sum, p) => sum + p.total, 0) }
+				: null
 		})
 	);
 
@@ -92,8 +107,9 @@
 <section aria-label="Dashboard">
 	<div class="flex items-end justify-between gap-3">
 		<div>
-			<h1 class="text-2xl font-semibold">{greeting}</h1>
-			<p class="text-sm text-slate-400">{prettyDate(today())}</p>
+			<h1 class="text-2xl font-semibold">{greeting.headline}</h1>
+			<p class="mt-1 text-slate-300">{greeting.line}</p>
+			<p class="mt-1 text-sm text-slate-500">{prettyDate(today())}</p>
 		</div>
 		<button
 			onclick={() => (customizing = !customizing)}

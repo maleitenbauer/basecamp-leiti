@@ -89,6 +89,22 @@ export const modules: ModuleInfo[] = [
 				]
 			}
 		]
+	},
+	{
+		id: 'report',
+		name: 'Report',
+		href: '/report',
+		icon: '📊',
+		description: 'Your week at a glance, across every module',
+		submodules: [
+			{
+				id: 'weekly',
+				name: 'Weekly report',
+				href: '/report',
+				description: 'What you got done this week and how it compares to your goals, from every module',
+				pages: [{ id: 'weekly', name: 'Weekly report', href: '/report' }]
+			}
+		]
 	}
 ];
 
