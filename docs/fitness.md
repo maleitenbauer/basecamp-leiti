@@ -31,5 +31,32 @@ else keeps working.
 
 ## Training
 
-`/lifestyle/fitness/training` is an empty page registered in the module registry, nothing more. No tables or
-endpoints yet.
+`/lifestyle/fitness/training`: workout plans you run at the gym.
+
+- **Plans**: a named list of exercises ("Push day"), each with sets, reps, an optional weight and an optional rest time.
+  A plan can be linked to one of your routines (for example "Gym, 3 times a week").
+- **Running a workout**: press *Start workout* on a plan (or *Empty workout*). The plan's exercises are copied into the
+  workout, so editing or deleting the plan later never changes history. For each exercise you log the sets you did; the
+  fields are prefilled from your last set, else from last time, else from the plan, so a normal set is one tap. You can
+  fix or remove sets, and add an exercise on the spot. *Last time* shows what you did in the previous workout.
+- **Rest timer**: after each set a countdown starts (the exercise's rest time, 90 s by default; 0 turns it off) and the
+  phone vibrates when it's over. The screen is kept awake while training, where the browser allows it.
+- **Time tracking**: the clock starts when you press Start. *Finish workout* stops it; the time goes into the history.
+- **Automatic finish**: a workout still running after 2 hours is ended for you (`basecamp.training.auto-finish-minutes`,
+  env `BASECAMP_TRAINING_AUTO_FINISH_MINUTES`). It is saved as ending shortly (5 minutes) after your last logged set, not
+  at the 2 hours, so a forgotten workout doesn't turn into a long one. If nothing was logged at all it is dropped. You get
+  a notification either way. A timer checks every 5 minutes, and opening the page checks too.
+- **Routine link**: finishing a workout (or the automatic finish) ticks the linked routine off for that day, with the
+  minutes you trained, so a "Gym 3 times a week" routine fills itself. Discarding a workout doesn't undo that.
+- **Motivation**: a warm message when you start (it knows if it's your first workout, a comeback after a break, the
+  last one of the week), an encouraging line while you train, and one when you finish (personal bests, weekly goal).
+  They live in `web/src/modules/lifestyle/fitness/training/motivation.ts` and rotate like the dashboard greetings.
+- **Personal bests**: after a workout, any exercise where your best set beat everything you ever did in it (heavier, or
+  more reps at the same weight) is called out. The first time you do an exercise doesn't count. Exercises are matched by
+  name, ignoring case and extra spaces.
+- **Dashboard and report**: a Training tile (running workout with its timer, or this week's count) and a Training section
+  in the weekly report (workouts, time, sets, weight moved, minutes per day).
+
+Backend: `com.markus.basecamp.logbook.fitness` (`Training*` files), tables from `V14__fitness_training.sql`
+(`workout_plan`, `workout_plan_exercise`, `workout_session`, `workout_exercise`, `workout_set`). A partial unique index
+allows only one running workout per user. The endpoints are under `/api/logbook/fitness/training`.

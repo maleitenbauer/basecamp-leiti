@@ -82,7 +82,7 @@ export const modules: ModuleInfo[] = [
 				id: 'fitness',
 				name: 'Fitness',
 				href: '/lifestyle/fitness',
-				description: 'Daily calorie goal and meal log with your own food library; training tracker coming soon',
+				description: 'Daily calorie goal and meal log with your own food library; workout plans you run at the gym with a timer',
 				pages: [
 					{ id: 'nutrition', name: 'Nutrition', href: '/lifestyle/fitness' },
 					{ id: 'training', name: 'Training', href: '/lifestyle/fitness/training' }

@@ -100,8 +100,8 @@ Go API were not independently verified against source.
 
 ## Lifestyle > Fitness
 
-A calorie goal, a meal log with your own food library (optionally filled from Open Food Facts), and a placeholder
-training page. See [docs/fitness.md](docs/fitness.md).
+A calorie goal, a meal log with your own food library (optionally filled from Open Food Facts), and workout plans you
+run at the gym with a timer, a rest timer, motivation messages and automatic finish. See [docs/fitness.md](docs/fitness.md).
 
 ## Lifestyle > Routine
 

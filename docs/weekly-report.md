@@ -41,7 +41,7 @@ class MyReportContributor(private val things: ThingRepository) : WeeklyReportCon
   `Cs2PracticeReport`) so it's unit-testable without a database; the contributor just loads the data and calls it.
 - A contributor that throws is logged and skipped; it never breaks the whole report.
 
-Current sections: Routines (10), Todos (20), Nutrition (30), CS2 practice (40). Shopping isn't in the report yet.
+Current sections: Routines (10), Todos (20), Training (25), Nutrition (30), CS2 practice (40). Shopping isn't in the report yet.
 
 ## Welcome messages
 

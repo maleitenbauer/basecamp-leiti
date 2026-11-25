@@ -63,6 +63,9 @@ basecamp:
     product-url: https://world.openfoodfacts.org
     user-agent: Basecamp/1.0 (self-hosted personal app)
 
+  training:                 # Lifestyle > Fitness > Training
+    auto-finish-minutes: ${BASECAMP_TRAINING_AUTO_FINISH_MINUTES:120}   # a workout still running after this is ended automatically
+
 management:
   endpoints:
     web:
