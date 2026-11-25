@@ -119,6 +119,12 @@ handle in Customize mode; the tiles reorder live and glide into place, the page 
 bottom edge, and the new order is saved when you let go. Tiles you've hidden keep their positions in the saved order.
 The arrow buttons in the Customize panel do the same job for keyboard users.
 
+### Welcome message and the weekly report
+
+The heading's warm line comes from `web/src/lib/greetings.ts` (time of day plus today's overall progress, rotating
+daily). The "Weekly report" tile (`report.weekly`) has no `progress` hook, so it doesn't count towards the Today bar.
+See [weekly-report.md](weekly-report.md).
+
 ## Ways to make it more dynamic later
 
 1. **Per-tile settings** (medium). A tile declares a small settings schema ("how many items to show", "which list") and

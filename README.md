@@ -112,4 +112,11 @@ See [docs/routine.md](docs/routine.md).
 
 The home page shows an overall "done today" bar and a tile per module (routines, todos, calories, shopping, CS2
 practice), which you can drag into order and hide; the layout is saved to your account. A new module gets a tile by
-adding one `*.widget.ts` file. See [docs/dashboard.md](docs/dashboard.md).
+adding one `*.widget.ts` file. See [docs/dashboard.md](docs/dashboard.md). The dashboard and the report greet you with
+warm, rotating messages.
+
+## Weekly report
+
+`/report` summarises a week (Monday to Sunday) across routines, todos, nutrition and CS2 practice, with per-day bars,
+highlights and an overall score. A module joins by implementing one backend `WeeklyReportContributor`; the page needs
+no change. See [docs/weekly-report.md](docs/weekly-report.md).

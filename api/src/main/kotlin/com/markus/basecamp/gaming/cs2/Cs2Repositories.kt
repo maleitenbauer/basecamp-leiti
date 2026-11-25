@@ -33,6 +33,7 @@ interface RoutineLogRepository : JpaRepository<RoutineLog, Long> {
 
 interface SessionReviewRepository : JpaRepository<SessionReview, Long> {
     fun findTop30ByUserIdOrderByPlayedOnDescIdDesc(userId: Long): List<SessionReview>
+    fun findAllByUserIdAndPlayedOnBetween(userId: Long, from: LocalDate, to: LocalDate): List<SessionReview>
     fun findByIdAndUserId(id: Long, userId: Long): SessionReview?
 }
 

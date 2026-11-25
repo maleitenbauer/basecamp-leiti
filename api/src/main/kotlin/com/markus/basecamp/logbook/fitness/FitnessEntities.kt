@@ -113,5 +113,6 @@ interface FoodRepository : JpaRepository<Food, Long> {
 
 interface MealEntryRepository : JpaRepository<MealEntry, Long> {
     fun findAllByUserIdAndDayOrderByEatenAtAscIdAsc(userId: Long, day: LocalDate): List<MealEntry>
+    fun findAllByUserIdAndDayBetween(userId: Long, from: LocalDate, to: LocalDate): List<MealEntry>
     fun findByIdAndUserId(id: Long, userId: Long): MealEntry?
 }

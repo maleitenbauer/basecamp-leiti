@@ -70,6 +70,8 @@ interface TodoRepository : JpaRepository<Todo, Long> {
     fun findByIdAndUserId(id: Long, userId: Long): Todo?
     fun findAllByUserIdAndDoneFalseAndDueDate(userId: Long, dueDate: LocalDate): List<Todo>
     fun findAllByUserIdAndDoneFalseAndDueDateLessThan(userId: Long, before: LocalDate): List<Todo>
+    fun findAllByUserIdAndDoneTrueAndDoneAtBetween(userId: Long, from: Instant, to: Instant): List<Todo>
+    fun countByUserIdAndCreatedAtBetween(userId: Long, from: Instant, to: Instant): Long
 }
 
 interface TodoReminderSettingsRepository : JpaRepository<TodoReminderSettings, Long> {
